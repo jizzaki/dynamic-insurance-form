@@ -1,3 +1,4 @@
+import { ConditionalOperator } from '../enums/conditional-operator';
 import { FormPage } from '../models/form-question.model';
 import { Validators } from '@angular/forms';
 
@@ -27,7 +28,7 @@ export const ZOO_ANIMAL_INSURANCE_FORM: FormPage[] = [
       },
       {
         title: 'Animal Questionnaire',
-        conditionalOn: { key: 'numberOfTigers', operator: 'greaterThan', value: 0 },
+        conditionalOn: { key: 'numberOfTigers', operator: ConditionalOperator.GreaterThan, value: 0 },
         repeatFor: { key: 'numberOfTigers' }, // this field holds the number of repeats
         questions: [
           { key: 'animalName', label: 'Name of Tiger', type: 'text', validators: [Validators.required] },

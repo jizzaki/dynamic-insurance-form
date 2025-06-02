@@ -1,3 +1,5 @@
+import { ConditionalOperator } from "../enums/conditional-operator";
+
 export interface FormQuestion {
   key: string;
   label: string;
@@ -29,5 +31,5 @@ export interface FormPage {
 export interface ConditionalOn {
   key: string;
   value?: any;
-  operator?: 'equals' | 'notEquals' | 'greaterThan' | 'lessThan' | 'greaterThanOrEqual' | 'lessThanOrEqual';
+  operator?: ConditionalOperator;
 }

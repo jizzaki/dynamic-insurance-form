@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { FormQuestion, FormSection } from '../models/form-question.model';
+import { ConditionalOperator } from '../enums/conditional-operator';
 
 @Injectable({ providedIn: 'root' })
 export class FormBuilderService {
@@ -62,33 +63,34 @@ export class FormBuilderService {
 
     if (item.conditionalOn) {
       const parentControl = form.get(item.conditionalOn.key);
-      const parentValue = parentControl?.value;
-      const expectedValue = item.conditionalOn.value;
+      const value = parentControl?.value;
+      const expected = item.conditionalOn.value;
       const operator = item.conditionalOn.operator ?? 'equals';
 
       switch (operator) {
-        case 'equals':
-          isVisible = parentValue === expectedValue;
+        case ConditionalOperator.Equals:
+          isVisible = value === expected;
           break;
-        case 'notEquals':
-          isVisible = parentValue !== expectedValue;
+        case ConditionalOperator.NotEquals:
+          isVisible = value !== expected;
           break;
-        case 'greaterThan':
-          isVisible = Number(parentValue) > Number(expectedValue);
+        case ConditionalOperator.GreaterThan:
+          isVisible = value > expected;
           break;
-        case 'lessThan':
-          isVisible = Number(parentValue) < Number(expectedValue);
+        case ConditionalOperator.LessThan:
+          isVisible = value < expected;
           break;
-        case 'greaterThanOrEqual':
-          isVisible = Number(parentValue) >= Number(expectedValue);
+        case ConditionalOperator.GreaterThanOrEqual:
+          isVisible = value >= expected;
           break;
-        case 'lessThanOrEqual':
-          isVisible = Number(parentValue) <= Number(expectedValue);
+        case ConditionalOperator.LessThanOrEqual:
+          isVisible = value <= expected;
           break;
         default:
-          isVisible = parentValue === expectedValue;
+          isVisible = value === expected;
           break;
       }
+
     }
 
     if (item.key) {
@@ -137,22 +139,22 @@ export class FormBuilderService {
     let isVisible = true;
 
     switch (operator) {
-      case 'equals':
+      case ConditionalOperator.Equals:
         isVisible = value === expected;
         break;
-      case 'notEquals':
+      case ConditionalOperator.NotEquals:
         isVisible = value !== expected;
         break;
-      case 'greaterThan':
+      case ConditionalOperator.GreaterThan:
         isVisible = valueNum > expectedNum;
         break;
-      case 'lessThan':
+      case ConditionalOperator.LessThan:
         isVisible = valueNum < expectedNum;
         break;
-      case 'greaterThanOrEqual':
+      case ConditionalOperator.GreaterThanOrEqual:
         isVisible = valueNum >= expectedNum;
         break;
-      case 'lessThanOrEqual':
+      case ConditionalOperator.LessThanOrEqual:
         isVisible = valueNum <= expectedNum;
         break;
       default:
