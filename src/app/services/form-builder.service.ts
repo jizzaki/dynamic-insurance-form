@@ -112,10 +112,21 @@ export class FormBuilderService {
     value: any,
     expected: any,
     operator: ConditionalOperator,
-    evaluateNested?: (cond: ConditionalOn) => boolean
+    evaluateNested?: (c: ConditionalOn) => boolean
   ): boolean {
     const valueNum = Number(value);
     const expectedNum = Number(expected);
+
+    // Defer evaluation if value is not yet filled
+    if (
+      [ConditionalOperator.Equals, ConditionalOperator.NotEquals,
+      ConditionalOperator.GreaterThan, ConditionalOperator.GreaterThanOrEqual,
+      ConditionalOperator.LessThan, ConditionalOperator.LessThanOrEqual].includes(operator)
+      && (value === undefined || value === null || value === '')
+    ) {
+      console.warn('Skipping condition due to missing value:', { value, expected, operator });
+      return false;
+    }
 
     switch (operator) {
       case ConditionalOperator.Equals:
@@ -139,42 +150,75 @@ export class FormBuilderService {
       case ConditionalOperator.IsTruthy:
         return !!value;
       case ConditionalOperator.Not:
-        if (evaluateNested && Array.isArray(expected)) {
-          return !expected.every(cond => evaluateNested(cond));
-        }
         return !value;
       default:
         return value === expected;
     }
   }
 
+
   evaluateConditionalOn(cond: ConditionalOn, form: FormGroup): boolean {
     const operator = cond.operator ?? ConditionalOperator.Equals;
 
-    // Handle compound conditions
-    if ([ConditionalOperator.All, ConditionalOperator.Any, ConditionalOperator.Not].includes(operator)) {
-      const subConditions = cond.conditions ?? [];
+    if (operator === ConditionalOperator.All || operator === ConditionalOperator.Any) {
+      if (!cond.conditions || cond.conditions.length === 0) return true;
 
-      if (operator === ConditionalOperator.All) {
-        return subConditions.every(c => this.evaluateConditionalOn(c, form));
-      }
+      // Check if all dependent controls have values
+      const allHaveValues = cond.conditions.every(c => {
+        if (c.key) {
+          const val = form.get(c.key)?.value;
+          return val !== undefined && val !== null && val !== '';
+        }
+        return true; // nested conditions
+      });
 
-      if (operator === ConditionalOperator.Any) {
-        return subConditions.some(c => this.evaluateConditionalOn(c, form));
-      }
+      if (!allHaveValues) return false;
 
-      if (operator === ConditionalOperator.Not) {
-        return !subConditions.every(c => this.evaluateConditionalOn(c, form));
-      }
+      const results = cond.conditions.map(c => this.evaluateConditionalOn(c, form));
+      return operator === ConditionalOperator.All ? results.every(Boolean) : results.some(Boolean);
     }
 
-    // Simple condition
-    const value = cond.key ? form.get(cond.key)?.value : undefined;
-    return this.evaluateCondition(value, cond.value, operator, (c) => this.evaluateConditionalOn(c, form));
+
+    if (operator === ConditionalOperator.Not) {
+      const inner = cond.conditions?.[0];
+      if (!inner) return false;
+
+      // Recursively check all nested conditions have values
+      const allKeysHaveValues = this.hasAllKeysFilled(inner, form);
+      if (!allKeysHaveValues) return false;
+
+      return !this.evaluateConditionalOn(inner, form);
+    }
+
+    // Delay evaluation if value is empty
+    if (cond.key) {
+      const value = form.get(cond.key)?.value;
+      if (value === undefined || value === null || value === '') {
+        // Don't evaluate yet
+        return false;
+      }
+
+      return this.evaluateCondition(value, cond.value, cond.operator);
+    }
+
+    return true;
   }
 
   getRepeatArray(count: number): number[] {
     return Array.from({ length: count }, (_, i) => i);
+  }
+
+  private hasAllKeysFilled(cond: ConditionalOn, form: FormGroup): boolean {
+    if (cond.key) {
+      const val = form.get(cond.key)?.value;
+      return val !== undefined && val !== null && val !== '';
+    }
+
+    if (cond.conditions?.length) {
+      return cond.conditions.every(c => this.hasAllKeysFilled(c, form));
+    }
+
+    return true;
   }
 
 } 

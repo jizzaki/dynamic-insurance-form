@@ -39,10 +39,15 @@ export const ZOO_ANIMAL_INSURANCE_FORM: FormPage[] = [
       {
         title: 'Old Tigers Only Questionnaire',
         conditionalOn: {
-          operator: ConditionalOperator.All,
+          operator: ConditionalOperator.Not,
           conditions: [
-            { key: 'numberOfTigers', operator: ConditionalOperator.GreaterThanOrEqual, value: 5 },
-            { key: 'tigersAreOld', operator: ConditionalOperator.Equals, value: 'Yes' }
+            {
+              operator: ConditionalOperator.Any,
+              conditions: [
+                { key: 'numberOfTigers', operator: ConditionalOperator.GreaterThanOrEqual, value: 5 },
+                { key: 'tigersAreOld', operator: ConditionalOperator.Equals, value: 'Yes' }
+              ]
+            }
           ]
         },
         questions: [
