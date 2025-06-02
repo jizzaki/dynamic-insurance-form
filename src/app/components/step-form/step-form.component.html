@@ -1,0 +1,216 @@
+<div class="stepper" *ngIf="form && pages?.length">
+  <div class="step" *ngIf="pages[currentPageIndex] as page">
+    <h2 class="step-title">{{ page.title }}</h2>
+
+    <ng-container *ngIf="currentPageIndex < pages.length - 1">
+      <ng-container *ngFor="let section of page.sections">
+        <ng-container *ngIf="formBuilderService.isSectionVisible(section, form)">
+          <h3>{{ section.title }}</h3>
+
+          <ng-container *ngIf="section.repeatFor?.key as repeatKey; else nonRepeatingSection">
+            <ng-container *ngFor="let i of formBuilderService.getRepeatArray(form.get(repeatKey)?.value || 0)">
+              <div class="border rounded p-3 mb-3">
+                <h4>{{ section.title }} {{ i + 1 }}</h4>
+                <ng-container *ngFor="let question of section.questions">
+                  <div *ngIf="formBuilderService.isVisible(question, form)">
+                    <ng-container *ngIf="form.get(question.key + '_' + i) as ctrl">
+                      <div class="mb-3" [ngSwitch]="question.type">
+
+                        <div *ngSwitchCase="'text'">
+                          <label class="form-label">{{ question.label }} {{ question.directive }}</label>
+                          <input-with-directive [formControl]="ctrl" [directive]="question.directive"
+                            [inputType]="question.inputType" [className]="'form-control'" [mask]="question.mask"
+                            [ngClass]="{ 'is-invalid': ctrl.invalid && (ctrl.touched || ctrl.dirty) }" />
+                          <div class="invalid-feedback" *ngIf="ctrl.invalid && (ctrl.touched || ctrl.dirty)">This field
+                            is
+                            required.</div>
+                        </div>
+
+                        <div *ngSwitchCase="'textarea'">
+                          <label class="form-label">{{ question.label }}</label>
+                          <textarea class="form-control" [formControl]="ctrl"
+                            [ngClass]="{ 'is-invalid': ctrl.invalid && (ctrl.touched || ctrl.dirty) }"></textarea>
+                          <div class="invalid-feedback" *ngIf="ctrl.invalid && (ctrl.touched || ctrl.dirty)">This field
+                            is
+                            required.</div>
+                        </div>
+
+                        <div *ngSwitchCase="'select'">
+                          <label class="form-label">{{ question.label }}</label>
+                          <select class="form-select" [formControl]="ctrl"
+                            [ngClass]="{ 'is-invalid': ctrl.invalid && (ctrl.touched || ctrl.dirty) }">
+                            <option *ngFor="let opt of question.options" [value]="opt">{{ opt }}</option>
+                          </select>
+                          <div class="invalid-feedback" *ngIf="ctrl.invalid && (ctrl.touched || ctrl.dirty)">Please
+                            select an
+                            option.</div>
+                        </div>
+
+                        <div *ngSwitchCase="'radio'">
+                          <label class="form-label d-block">{{ question.label }}</label>
+                          <div *ngFor="let opt of question.options" class="form-check">
+                            <input type="radio" class="form-check-input" [value]="opt" [formControl]="ctrl"
+                              [id]="question.key + '_' + opt" />
+                            <label class="form-check-label" [for]="question.key + '_' + opt">{{ opt }}</label>
+                          </div>
+                          <div class="text-danger small" *ngIf="ctrl.invalid && (ctrl.touched || ctrl.dirty)">Please
+                            select an
+                            option.</div>
+                        </div>
+
+                        <div *ngSwitchCase="'checkbox-group'">
+                          <label class="form-label d-block">{{ question.label }}</label>
+                          <div *ngFor="let opt of question.options" class="form-check">
+                            <input type="checkbox" class="form-check-input" [checked]="ctrl.value?.includes(opt)"
+                              (change)="onCheckboxToggle(question.key, opt)" />
+                            <label class="form-check-label">{{ opt }}</label>
+                          </div>
+                          <div class="text-danger small mt-1" *ngIf="ctrl.invalid && (ctrl.touched || ctrl.dirty)">
+                            Please select at least one option.
+                          </div>
+                        </div>
+
+                        <div *ngSwitchCase="'number'">
+                          <label class="form-label">{{ question.label }}</label>
+                          <input type="number" class="form-control" [formControl]="ctrl"
+                            [ngClass]="{ 'is-invalid': ctrl.invalid && (ctrl.touched || ctrl.dirty) }"
+                            [attr.min]="question.min" [attr.max]="question.max" [attr.step]="question.step || 1" />
+                          <div class="invalid-feedback" *ngIf="ctrl.invalid && (ctrl.touched || ctrl.dirty)">
+                            Please enter a valid number.
+                          </div>
+                        </div>
+
+                      </div>
+                    </ng-container>
+                  </div>
+                </ng-container>
+              </div>
+            </ng-container>
+          </ng-container>
+
+          <ng-template #nonRepeatingSection>
+            <div *ngFor="let question of section.questions">
+              <div *ngIf="formBuilderService.isVisible(question, form)">
+                <ng-container *ngIf="form.get(question.key) as ctrl">
+                  <div class="mb-3" [ngSwitch]="question.type">
+
+                    <div *ngSwitchCase="'text'">
+                      <label class="form-label">{{ question.label }} {{ question.directive }}</label>
+                      <input-with-directive [formControl]="ctrl" [directive]="question.directive"
+                        [inputType]="question.inputType" [className]="'form-control'" [mask]="question.mask"
+                        [ngClass]="{ 'is-invalid': ctrl.invalid && (ctrl.touched || ctrl.dirty) }" />
+                      <div class="invalid-feedback" *ngIf="ctrl.invalid && (ctrl.touched || ctrl.dirty)">This field is
+                        required.</div>
+                    </div>
+
+                    <div *ngSwitchCase="'textarea'">
+                      <label class="form-label">{{ question.label }}</label>
+                      <textarea class="form-control" [formControl]="ctrl"
+                        [ngClass]="{ 'is-invalid': ctrl.invalid && (ctrl.touched || ctrl.dirty) }"></textarea>
+                      <div class="invalid-feedback" *ngIf="ctrl.invalid && (ctrl.touched || ctrl.dirty)">This field is
+                        required.</div>
+                    </div>
+
+                    <div *ngSwitchCase="'select'">
+                      <label class="form-label">{{ question.label }}</label>
+                      <select class="form-select" [formControl]="ctrl"
+                        [ngClass]="{ 'is-invalid': ctrl.invalid && (ctrl.touched || ctrl.dirty) }">
+                        <option *ngFor="let opt of question.options" [value]="opt">{{ opt }}</option>
+                      </select>
+                      <div class="invalid-feedback" *ngIf="ctrl.invalid && (ctrl.touched || ctrl.dirty)">Please select
+                        an
+                        option.</div>
+                    </div>
+
+                    <div *ngSwitchCase="'radio'">
+                      <label class="form-label d-block">{{ question.label }}</label>
+                      <div *ngFor="let opt of question.options" class="form-check">
+                        <input type="radio" class="form-check-input" [value]="opt" [formControl]="ctrl"
+                          [id]="question.key + '_' + opt" />
+                        <label class="form-check-label" [for]="question.key + '_' + opt">{{ opt }}</label>
+                      </div>
+                      <div class="text-danger small" *ngIf="ctrl.invalid && (ctrl.touched || ctrl.dirty)">Please select
+                        an
+                        option.</div>
+                    </div>
+
+                    <div *ngSwitchCase="'checkbox-group'">
+                      <label class="form-label d-block">{{ question.label }}</label>
+                      <div *ngFor="let opt of question.options" class="form-check">
+                        <input type="checkbox" class="form-check-input" [checked]="ctrl.value?.includes(opt)"
+                          (change)="onCheckboxToggle(question.key, opt)" />
+                        <label class="form-check-label">{{ opt }}</label>
+                      </div>
+                      <div class="text-danger small mt-1" *ngIf="ctrl.invalid && (ctrl.touched || ctrl.dirty)">
+                        Please select at least one option.
+                      </div>
+                    </div>
+
+                    <div *ngSwitchCase="'number'">
+                      <label class="form-label">{{ question.label }}</label>
+                      <input type="number" class="form-control" [formControl]="ctrl"
+                        [ngClass]="{ 'is-invalid': ctrl.invalid && (ctrl.touched || ctrl.dirty) }"
+                        [attr.min]="question.min" [attr.max]="question.max" [attr.step]="question.step || 1" />
+                      <div class="invalid-feedback" *ngIf="ctrl.invalid && (ctrl.touched || ctrl.dirty)">
+                        Please enter a valid number.
+                      </div>
+                    </div>
+
+                  </div>
+                </ng-container>
+              </div>
+            </div>
+          </ng-template>
+
+        </ng-container>
+      </ng-container>
+    </ng-container>
+
+    <!-- Confirmation -->
+    <ng-container *ngIf="currentPageIndex === pages.length - 1">
+      <h3>Insurance Summary</h3>
+      <ng-container *ngFor="let page of pages; let pageIndex = index">
+        <ng-container *ngIf="pageIndex < pages.length - 1">
+          <h4>{{ page.title }}</h4>
+          <ng-container *ngFor="let section of page.sections">
+            <ng-container *ngIf="formBuilderService.isSectionVisible(section, form)">
+              <h5>{{ section.title }}</h5>
+              <ul class="list-unstyled">
+                <ng-container *ngFor="let question of section.questions">
+                  <li *ngIf="formBuilderService.isVisible(question, form)">
+                    <strong>{{ question.label }}:</strong>
+                    <span>{{ getAnswerValue(question.key) }}</span>
+                  </li>
+                </ng-container>
+              </ul>
+            </ng-container>
+          </ng-container>
+        </ng-container>
+      </ng-container>
+    </ng-container>
+
+
+    <!-- enable later
+    
+    <ng-container *ngIf="section.repeatFor; else nonRepeatingSummary"> 
+      <ng-container *ngFor="let i of formBuilderService.getRepeatArray(form.get(section.repeatFor.key)?.value || 0)">
+        <ul class="list-unstyled">
+          <ng-container *ngFor="let question of section.questions">
+            <li *ngIf="formBuilderService.isVisible(question, form)">
+              <strong>{{ question.label }} {{ i + 1 }}:</strong>
+              <span>{{ getAnswerValue(question.key, i) }}</span>
+            </li>
+          </ng-container>
+        </ul>
+      </ng-container>
+    </ng-container> -->
+
+
+    <!-- Buttons here -->
+    <div class="step-actions d-flex gap-2 mt-4">
+      <button class="btn btn-secondary" (click)="goToPreviousStep()" *ngIf="currentPageIndex > 0">Back</button>
+      <button class="btn btn-success" (click)="goToNextStep()" *ngIf="currentPageIndex < pages.length - 1">Next</button>
+      <button class="btn btn-success" (click)="onSubmit()" *ngIf="currentPageIndex === pages.length - 1">Submit</button>
+    </div>
+  </div>
+</div>

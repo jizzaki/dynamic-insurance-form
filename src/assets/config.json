@@ -1,0 +1,14 @@
+{
+    "uiServiceUrl": "https://localhost:44308",
+    "Environment": "local",
+    "dd_clientToken": "pub-8c3b0f4a1e5d4f2a8b7c9d6e0e2f3c4b",
+    "dd_enabled": false,
+    "log_to_console": true,
+    "Recaptcha": {
+        "Active": false,
+        "Sitekey": "6Ld47yEaAAAAAJrBqT2_PUgpglgizdRmW7iR7YzM"
+    },
+    "ARCAPISettings": {
+        "UseMessaging": true
+    }
+}
