@@ -4,10 +4,7 @@ export interface FormQuestion {
   type: 'text' | 'radio' | 'textarea' | 'select' | 'group' | 'checkbox-group' | 'number';
   options?: string[];
   children?: FormQuestion[]; // nested dynamic questions
-  conditionalOn?: {
-    key: string;
-    value: any;
-  };
+  conditionalOn?: ConditionalOn;
   validators?: any[];
   onBlur?: string;
   multiple?: boolean; // for checkbox-group
@@ -20,14 +17,17 @@ export interface FormQuestion {
 export interface FormSection {
   title: string;
   questions: FormQuestion[];
-  conditionalOn?: {
-    key: string;
-    value: any;
-  };
+  conditionalOn?: ConditionalOn;
   repeatFor?: { key: string };
 }
 
 export interface FormPage {
   title: string;
   sections: FormSection[];
+}
+
+export interface ConditionalOn {
+  key: string;
+  value?: any;
+  operator?: 'equals' | 'notEquals' | 'greaterThan' | 'lessThan' | 'greaterThanOrEqual' | 'lessThanOrEqual';
 }

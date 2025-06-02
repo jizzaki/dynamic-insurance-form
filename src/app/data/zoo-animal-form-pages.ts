@@ -27,6 +27,7 @@ export const ZOO_ANIMAL_INSURANCE_FORM: FormPage[] = [
       },
       {
         title: 'Animal Questionnaire',
+        conditionalOn: { key: 'numberOfTigers', operator: 'greaterThan', value: 0 },
         repeatFor: { key: 'numberOfTigers' }, // this field holds the number of repeats
         questions: [
           { key: 'animalName', label: 'Name of Tiger', type: 'text', validators: [Validators.required] },

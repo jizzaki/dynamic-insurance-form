@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { FormQuestion } from '../models/form-question.model';
+import { FormQuestion, FormSection } from '../models/form-question.model';
 
 @Injectable({ providedIn: 'root' })
 export class FormBuilderService {
@@ -58,22 +58,44 @@ export class FormBuilderService {
   }
 
   isVisible(item: FormQuestion, form: FormGroup): boolean {
-
-    // Evaluate visibility based on conditional parent
     let isVisible = true;
 
     if (item.conditionalOn) {
       const parentControl = form.get(item.conditionalOn.key);
-      isVisible = parentControl?.value === item.conditionalOn.value;
+      const parentValue = parentControl?.value;
+      const expectedValue = item.conditionalOn.value;
+      const operator = item.conditionalOn.operator ?? 'equals';
+
+      switch (operator) {
+        case 'equals':
+          isVisible = parentValue === expectedValue;
+          break;
+        case 'notEquals':
+          isVisible = parentValue !== expectedValue;
+          break;
+        case 'greaterThan':
+          isVisible = Number(parentValue) > Number(expectedValue);
+          break;
+        case 'lessThan':
+          isVisible = Number(parentValue) < Number(expectedValue);
+          break;
+        case 'greaterThanOrEqual':
+          isVisible = Number(parentValue) >= Number(expectedValue);
+          break;
+        case 'lessThanOrEqual':
+          isVisible = Number(parentValue) <= Number(expectedValue);
+          break;
+        default:
+          isVisible = parentValue === expectedValue;
+          break;
+      }
     }
 
-    // Only apply form control logic if this item has a key (i.e., it's a question)
     if (item.key) {
       const control = form.get(item.key);
 
       if (control) {
         if (isVisible) {
-          // Only enable if question is NOT marked as disabled
           if (!item.disabled) {
             control.enable({ emitEvent: false });
           }
@@ -91,7 +113,7 @@ export class FormBuilderService {
       }
     }
 
-    // Recursively evaluate children
+    // Recurse on children
     if (item.children?.length) {
       item.children.forEach(child => this.isVisible(child, form));
     }
@@ -99,24 +121,54 @@ export class FormBuilderService {
     return isVisible;
   }
 
-  isSectionVisible(
-    section: { conditionalOn?: { key: string; value: any }; questions: any[] },
-    form: FormGroup
-  ): boolean {
+
+  isSectionVisible(section: FormSection, form: FormGroup): boolean {
     if (!section.conditionalOn) return true;
 
-    const parentControl = form.get(section.conditionalOn.key);
-    const isVisible = parentControl?.value === section.conditionalOn.value;
+    const control = form.get(section.conditionalOn.key);
+    const value = control?.value;
+    const expected = section.conditionalOn.value;
+    const operator = section.conditionalOn.operator ?? 'equals';
 
-    // If section is not visible, disable all its questions
+    // Coerce to number for math comparisons
+    const valueNum = Number(value);
+    const expectedNum = Number(expected);
+
+    let isVisible = true;
+
+    switch (operator) {
+      case 'equals':
+        isVisible = value === expected;
+        break;
+      case 'notEquals':
+        isVisible = value !== expected;
+        break;
+      case 'greaterThan':
+        isVisible = valueNum > expectedNum;
+        break;
+      case 'lessThan':
+        isVisible = valueNum < expectedNum;
+        break;
+      case 'greaterThanOrEqual':
+        isVisible = valueNum >= expectedNum;
+        break;
+      case 'lessThanOrEqual':
+        isVisible = valueNum <= expectedNum;
+        break;
+      default:
+        isVisible = value === expected;
+        break;
+    }
+
+    // If section is not visible, clear and disable all its controls
     if (!isVisible) {
       section.questions.forEach(q => {
-        const control = form.get(q.key);
-        if (control) {
-          control.setValue(null);
-          control.clearValidators();
-          control.disable({ emitEvent: false });
-          control.updateValueAndValidity({ emitEvent: false });
+        const ctrl = form.get(q.key);
+        if (ctrl) {
+          ctrl.setValue(null);
+          ctrl.clearValidators();
+          ctrl.disable({ emitEvent: false });
+          ctrl.updateValueAndValidity({ emitEvent: false });
         }
       });
     }

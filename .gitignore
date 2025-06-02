@@ -38,3 +38,4 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
+.angular/cache/19.2.14/Zoo.Forms/.tsbuildinfo
