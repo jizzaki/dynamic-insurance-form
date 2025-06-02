@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { FormQuestion, FormSection } from '../models/form-question.model';
+import { ConditionalOn, FormQuestion, FormSection } from '../models/form-question.model';
 import { ConditionalOperator } from '../enums/conditional-operator';
 
 @Injectable({ providedIn: 'root' })
@@ -59,43 +59,7 @@ export class FormBuilderService {
   }
 
   isVisible(item: FormQuestion, form: FormGroup): boolean {
-    let isVisible = true;
-
-    if (item.conditionalOn) {
-      const { key, value, operator = ConditionalOperator.Equals } = item.conditionalOn;
-      const parentControl = form.get(key);
-      const parentValue = parentControl?.value;
-
-      switch (operator) {
-        case ConditionalOperator.Equals:
-          isVisible = parentValue === value;
-          break;
-        case ConditionalOperator.NotEquals:
-          isVisible = parentValue !== value;
-          break;
-        case ConditionalOperator.GreaterThan:
-          isVisible = Number(parentValue) > Number(value);
-          break;
-        case ConditionalOperator.LessThan:
-          isVisible = Number(parentValue) < Number(value);
-          break;
-        case ConditionalOperator.GreaterThanOrEqual:
-          isVisible = Number(parentValue) >= Number(value);
-          break;
-        case ConditionalOperator.LessThanOrEqual:
-          isVisible = Number(parentValue) <= Number(value);
-          break;
-        case ConditionalOperator.In:
-          isVisible = Array.isArray(value) && value.includes(parentValue);
-          break;
-        case ConditionalOperator.IsTruthy:
-          isVisible = !!parentValue;
-          break;
-        default:
-          isVisible = parentValue === value;
-          break;
-      }
-    }
+    const isVisible = item.conditionalOn ? this.evaluateConditionalOn(item.conditionalOn, form) : true;
 
     if (item.key) {
       const control = form.get(item.key);
@@ -125,50 +89,8 @@ export class FormBuilderService {
     return isVisible;
   }
 
-
   isSectionVisible(section: FormSection, form: FormGroup): boolean {
-    if (!section.conditionalOn) return true;
-
-    const control = form.get(section.conditionalOn.key);
-    const value = control?.value;
-    const expected = section.conditionalOn.value;
-    const operator = section.conditionalOn.operator ?? ConditionalOperator.Equals;
-
-    // Convert to numbers for math comparisons
-    const valueNum = Number(value);
-    const expectedNum = Number(expected);
-
-    let isVisible = true;
-
-    switch (operator) {
-      case ConditionalOperator.Equals:
-        isVisible = value === expected;
-        break;
-      case ConditionalOperator.NotEquals:
-        isVisible = value !== expected;
-        break;
-      case ConditionalOperator.GreaterThan:
-        isVisible = valueNum > expectedNum;
-        break;
-      case ConditionalOperator.LessThan:
-        isVisible = valueNum < expectedNum;
-        break;
-      case ConditionalOperator.GreaterThanOrEqual:
-        isVisible = valueNum >= expectedNum;
-        break;
-      case ConditionalOperator.LessThanOrEqual:
-        isVisible = valueNum <= expectedNum;
-        break;
-      case ConditionalOperator.In:
-        isVisible = Array.isArray(expected) && expected.includes(value);
-        break;
-      case ConditionalOperator.IsTruthy:
-        isVisible = !!value;
-        break;
-      default:
-        isVisible = value === expected;
-        break;
-    }
+    const isVisible = section.conditionalOn ? this.evaluateConditionalOn(section.conditionalOn, form) : true;
 
     // If not visible, clear and disable all controls in this section
     if (!isVisible) {
@@ -186,6 +108,70 @@ export class FormBuilderService {
     return isVisible;
   }
 
+  evaluateCondition(
+    value: any,
+    expected: any,
+    operator: ConditionalOperator,
+    evaluateNested?: (cond: ConditionalOn) => boolean
+  ): boolean {
+    const valueNum = Number(value);
+    const expectedNum = Number(expected);
+
+    switch (operator) {
+      case ConditionalOperator.Equals:
+        return value === expected;
+      case ConditionalOperator.NotEquals:
+        return value !== expected;
+      case ConditionalOperator.GreaterThan:
+        return valueNum > expectedNum;
+      case ConditionalOperator.LessThan:
+        return valueNum < expectedNum;
+      case ConditionalOperator.GreaterThanOrEqual:
+        return valueNum >= expectedNum;
+      case ConditionalOperator.LessThanOrEqual:
+        return valueNum <= expectedNum;
+      case ConditionalOperator.In:
+        return Array.isArray(expected) && expected.includes(value);
+      case ConditionalOperator.Any:
+        return Array.isArray(value) && Array.isArray(expected) && value.some(v => expected.includes(v));
+      case ConditionalOperator.All:
+        return Array.isArray(value) && Array.isArray(expected) && expected.every(v => value.includes(v));
+      case ConditionalOperator.IsTruthy:
+        return !!value;
+      case ConditionalOperator.Not:
+        if (evaluateNested && Array.isArray(expected)) {
+          return !expected.every(cond => evaluateNested(cond));
+        }
+        return !value;
+      default:
+        return value === expected;
+    }
+  }
+
+  evaluateConditionalOn(cond: ConditionalOn, form: FormGroup): boolean {
+    const operator = cond.operator ?? ConditionalOperator.Equals;
+
+    // Handle compound conditions
+    if ([ConditionalOperator.All, ConditionalOperator.Any, ConditionalOperator.Not].includes(operator)) {
+      const subConditions = cond.conditions ?? [];
+
+      if (operator === ConditionalOperator.All) {
+        return subConditions.every(c => this.evaluateConditionalOn(c, form));
+      }
+
+      if (operator === ConditionalOperator.Any) {
+        return subConditions.some(c => this.evaluateConditionalOn(c, form));
+      }
+
+      if (operator === ConditionalOperator.Not) {
+        return !subConditions.every(c => this.evaluateConditionalOn(c, form));
+      }
+    }
+
+    // Simple condition
+    const value = cond.key ? form.get(cond.key)?.value : undefined;
+    return this.evaluateCondition(value, cond.value, operator, (c) => this.evaluateConditionalOn(c, form));
+  }
 
   getRepeatArray(count: number): number[] {
     return Array.from({ length: count }, (_, i) => i);

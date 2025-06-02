@@ -13,9 +13,7 @@ export const ZOO_ANIMAL_INSURANCE_FORM: FormPage[] = [
           { key: 'address', label: 'Address', type: 'text', validators: [Validators.required] },
           { key: 'phone', label: 'Phone Number', type: 'text', inputType: "tel", directive: "appPhoneNumberFormatter", validators: [Validators.required] },
           { key: 'state', label: 'State', type: 'select', options: ['CA', 'TX', 'NY', 'FL'], validators: [Validators.required] },
-          { key: 'zip', label: 'Zip Code', type: 'text', directive: "appZipCodeFormatter",
-            conditionalOn: { key: 'state', operator: ConditionalOperator.In, value: ['CA', 'FL'] },
-            validators: [Validators.required] },
+          { key: 'zip', label: 'Zip Code', type: 'text', directive: "appZipCodeFormatter", conditionalOn: { key: 'state', operator: ConditionalOperator.In, value: ['CA', 'FL'] }, validators: [Validators.required] },
           { key: 'policyStartDate', label: 'Policy Start Date', type: 'text', directive: "appDateFormatter", validators: [Validators.required] },
         ]
       },
@@ -25,6 +23,7 @@ export const ZOO_ANIMAL_INSURANCE_FORM: FormPage[] = [
           { key: 'animalType', label: 'Animal Type', type: 'select', options: ['Lion', 'Tiger', 'Zebra'], validators: [Validators.required] },
           { key: 'animalPrice', label: 'Animal Price', type: 'text', directive: "appCurrencyFormatter", validators: [Validators.required] },
           { key: 'wantsExtended', label: 'Would you like extended coverage?', type: 'radio', options: ['Yes', 'No'], validators: [Validators.required] },
+          { key: 'tigersAreOld', label: 'Are your tigers seniors?', type: 'radio', options: ['Yes', 'No'], validators: [Validators.required] },
           { key: 'numberOfTigers', label: 'How many tigers do you have?', type: 'number', validators: [Validators.required] },
         ],
       },
@@ -32,6 +31,20 @@ export const ZOO_ANIMAL_INSURANCE_FORM: FormPage[] = [
         title: 'Animal Questionnaire',
         conditionalOn: { key: 'numberOfTigers', operator: ConditionalOperator.GreaterThan, value: 0 },
         repeatFor: { key: 'numberOfTigers' }, // this field holds the number of repeats
+        questions: [
+          { key: 'animalName', label: 'Name of Tiger', type: 'text', validators: [Validators.required] },
+          { key: 'animalAge', label: 'Age of Tiger', type: 'text', validators: [Validators.required] },
+        ]
+      },
+      {
+        title: 'Old Tigers Only Questionnaire',
+        conditionalOn: {
+          operator: ConditionalOperator.All,
+          conditions: [
+            { key: 'numberOfTigers', operator: ConditionalOperator.GreaterThanOrEqual, value: 5 },
+            { key: 'tigersAreOld', operator: ConditionalOperator.Equals, value: 'Yes' }
+          ]
+        },
         questions: [
           { key: 'animalName', label: 'Name of Tiger', type: 'text', validators: [Validators.required] },
           { key: 'animalAge', label: 'Age of Tiger', type: 'text', validators: [Validators.required] },

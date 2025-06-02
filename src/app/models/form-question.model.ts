@@ -29,7 +29,8 @@ export interface FormPage {
 }
 
 export interface ConditionalOn {
-  key: string;
+  key?: string;
   value?: any;
   operator?: ConditionalOperator;
+  conditions?: ConditionalOn[]; // for All/Any/Not
 }

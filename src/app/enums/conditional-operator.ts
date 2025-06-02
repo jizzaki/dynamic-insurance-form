@@ -7,4 +7,7 @@ export enum ConditionalOperator {
     LessThanOrEqual = 'lessThanOrEqual',
     In = 'in',
     IsTruthy = '!!',
+    Any = 'any',
+    All = 'all',
+    Not = 'not'
 }
