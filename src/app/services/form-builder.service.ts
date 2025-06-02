@@ -62,35 +62,39 @@ export class FormBuilderService {
     let isVisible = true;
 
     if (item.conditionalOn) {
-      const parentControl = form.get(item.conditionalOn.key);
-      const value = parentControl?.value;
-      const expected = item.conditionalOn.value;
-      const operator = item.conditionalOn.operator ?? 'equals';
+      const { key, value, operator = ConditionalOperator.Equals } = item.conditionalOn;
+      const parentControl = form.get(key);
+      const parentValue = parentControl?.value;
 
       switch (operator) {
         case ConditionalOperator.Equals:
-          isVisible = value === expected;
+          isVisible = parentValue === value;
           break;
         case ConditionalOperator.NotEquals:
-          isVisible = value !== expected;
+          isVisible = parentValue !== value;
           break;
         case ConditionalOperator.GreaterThan:
-          isVisible = value > expected;
+          isVisible = Number(parentValue) > Number(value);
           break;
         case ConditionalOperator.LessThan:
-          isVisible = value < expected;
+          isVisible = Number(parentValue) < Number(value);
           break;
         case ConditionalOperator.GreaterThanOrEqual:
-          isVisible = value >= expected;
+          isVisible = Number(parentValue) >= Number(value);
           break;
         case ConditionalOperator.LessThanOrEqual:
-          isVisible = value <= expected;
+          isVisible = Number(parentValue) <= Number(value);
+          break;
+        case ConditionalOperator.In:
+          isVisible = Array.isArray(value) && value.includes(parentValue);
+          break;
+        case ConditionalOperator.IsTruthy:
+          isVisible = !!parentValue;
           break;
         default:
-          isVisible = value === expected;
+          isVisible = parentValue === value;
           break;
       }
-
     }
 
     if (item.key) {
@@ -98,9 +102,7 @@ export class FormBuilderService {
 
       if (control) {
         if (isVisible) {
-          if (!item.disabled) {
-            control.enable({ emitEvent: false });
-          }
+          if (!item.disabled) control.enable({ emitEvent: false });
         } else {
           control.disable({ emitEvent: false });
         }
@@ -130,9 +132,9 @@ export class FormBuilderService {
     const control = form.get(section.conditionalOn.key);
     const value = control?.value;
     const expected = section.conditionalOn.value;
-    const operator = section.conditionalOn.operator ?? 'equals';
+    const operator = section.conditionalOn.operator ?? ConditionalOperator.Equals;
 
-    // Coerce to number for math comparisons
+    // Convert to numbers for math comparisons
     const valueNum = Number(value);
     const expectedNum = Number(expected);
 
@@ -157,12 +159,18 @@ export class FormBuilderService {
       case ConditionalOperator.LessThanOrEqual:
         isVisible = valueNum <= expectedNum;
         break;
+      case ConditionalOperator.In:
+        isVisible = Array.isArray(expected) && expected.includes(value);
+        break;
+      case ConditionalOperator.IsTruthy:
+        isVisible = !!value;
+        break;
       default:
         isVisible = value === expected;
         break;
     }
 
-    // If section is not visible, clear and disable all its controls
+    // If not visible, clear and disable all controls in this section
     if (!isVisible) {
       section.questions.forEach(q => {
         const ctrl = form.get(q.key);
@@ -177,6 +185,7 @@ export class FormBuilderService {
 
     return isVisible;
   }
+
 
   getRepeatArray(count: number): number[] {
     return Array.from({ length: count }, (_, i) => i);

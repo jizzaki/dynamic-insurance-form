@@ -1,8 +1,10 @@
 export enum ConditionalOperator {
-  Equals = 'equals',
-  NotEquals = 'notEquals',
-  GreaterThan = 'greaterThan',
-  LessThan = 'lessThan',
-  GreaterThanOrEqual = 'greaterThanOrEqual',
-  LessThanOrEqual = 'lessThanOrEqual'
+    Equals = 'equals',
+    NotEquals = 'notEquals',
+    GreaterThan = 'greaterThan',
+    LessThan = 'lessThan',
+    GreaterThanOrEqual = 'greaterThanOrEqual',
+    LessThanOrEqual = 'lessThanOrEqual',
+    In = 'in',
+    IsTruthy = '!!',
 }

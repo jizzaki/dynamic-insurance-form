@@ -13,7 +13,9 @@ export const ZOO_ANIMAL_INSURANCE_FORM: FormPage[] = [
           { key: 'address', label: 'Address', type: 'text', validators: [Validators.required] },
           { key: 'phone', label: 'Phone Number', type: 'text', inputType: "tel", directive: "appPhoneNumberFormatter", validators: [Validators.required] },
           { key: 'state', label: 'State', type: 'select', options: ['CA', 'TX', 'NY', 'FL'], validators: [Validators.required] },
-          { key: 'zip', label: 'Zip Code', type: 'text', directive: "appZipCodeFormatter", validators: [Validators.required] },
+          { key: 'zip', label: 'Zip Code', type: 'text', directive: "appZipCodeFormatter",
+            conditionalOn: { key: 'state', operator: ConditionalOperator.In, value: ['CA', 'FL'] },
+            validators: [Validators.required] },
           { key: 'policyStartDate', label: 'Policy Start Date', type: 'text', directive: "appDateFormatter", validators: [Validators.required] },
         ]
       },
