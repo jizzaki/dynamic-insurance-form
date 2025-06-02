@@ -10,7 +10,7 @@ export class FormBuilderService {
     const group: Record<string, FormControl> = {};
 
     for (const section of sections) {
-      // ✅ Skip if section.questions is not an array
+      // Skip if section.questions is not an array
       if (!Array.isArray(section.questions)) {
         console.warn('Invalid section.questions:', section);
         continue;
@@ -25,7 +25,7 @@ export class FormBuilderService {
             const initialValue = question.type === 'checkbox-group' ? [] : null;
 
             group[key] = new FormControl(
-              { value: initialValue, disabled: !!question.conditionalOn },
+              { value: initialValue, disabled: !!question.conditionalOn || !!question.disabled },
               question.validators || []
             );
 
@@ -42,7 +42,7 @@ export class FormBuilderService {
           const initialValue = question.type === 'checkbox-group' ? [] : null;
 
           group[question.key] = new FormControl(
-            { value: initialValue, disabled: !!question.conditionalOn },
+            { value: initialValue, disabled: !!question.conditionalOn || !!question.disabled },
             question.validators || []
           );
 
@@ -57,37 +57,7 @@ export class FormBuilderService {
     return this.fb.group(group);
   }
 
-
-  buildFormOld(questions: FormQuestion[]): FormGroup {
-    const group: Record<string, FormControl> = {};
-
-    for (const question of questions) {
-      const validators = question.validators || [];
-      const initialValue = question.type === 'checkbox-group' ? [] : null;
-
-      group[question.key] = new FormControl(
-        { value: initialValue, disabled: !!question.conditionalOn },
-        validators
-      );
-
-      if (question.children) {
-        const childrenGroup = this.buildForm(question.children);
-        Object.assign(group, childrenGroup.controls);
-      }
-    }
-
-    return this.fb.group(group);
-  }
-
-  isVisible(
-    item: {
-      key?: string;
-      conditionalOn?: { key: string; value: any };
-      validators?: any[];
-      children?: any[];
-    },
-    form: FormGroup
-  ): boolean {
+  isVisible(item: FormQuestion, form: FormGroup): boolean {
 
     // Evaluate visibility based on conditional parent
     let isVisible = true;
@@ -103,14 +73,18 @@ export class FormBuilderService {
 
       if (control) {
         if (isVisible) {
-          control.enable({ emitEvent: false });
-          if (item.validators?.length) {
-            control.setValidators(item.validators);
+          // Only enable if question is NOT marked as disabled
+          if (!item.disabled) {
+            control.enable({ emitEvent: false });
           }
         } else {
-          control.clearValidators();
-          control.setValue(null);
           control.disable({ emitEvent: false });
+        }
+
+        if (item.validators?.length && !item.disabled) {
+          control.setValidators(item.validators);
+        } else {
+          control.clearValidators();
         }
 
         control.updateValueAndValidity({ emitEvent: false });

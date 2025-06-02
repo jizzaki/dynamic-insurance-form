@@ -17,6 +17,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
         [mask]="mask"
         (input)="onInput($event)"
         (blur)="onTouched()"
+        [disabled]="disabled"
       />
 
       <!-- Zip -->
@@ -30,6 +31,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
         [mask]="mask"
         (input)="onInput($event)"
         (blur)="onTouched()"
+        [disabled]="disabled"
       />
 
       <!-- Currency -->
@@ -43,6 +45,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
         [mask]="mask"
         (input)="onInput($event)"
         (blur)="onTouched()"
+        [disabled]="disabled"
       />
 
       <!-- Date -->
@@ -56,6 +59,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
         [mask]="mask"
         (input)="onInput($event)"
         (blur)="onTouched()"
+        [disabled]="disabled"
       />
 
       <!-- Default -->
@@ -68,6 +72,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
         [mask]="mask"
         (input)="onInput($event)"
         (blur)="onTouched()"
+        [disabled]="disabled"
       />
     </ng-container>
   `,
@@ -85,6 +90,7 @@ export class DynamicInputComponent implements ControlValueAccessor {
   @Input() className: string = 'form-control';
   @Input() ngClass: any;
   @Input() mask: string = '';
+  @Input() disabled: boolean = false;
 
   value: any = '';
   onChange: (val: any) => void = () => {};

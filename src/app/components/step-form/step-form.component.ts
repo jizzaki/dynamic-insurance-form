@@ -3,6 +3,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ZOO_ANIMAL_INSURANCE_FORM } from 'src/app/data/zoo-animal-form-pages';
 import { FormBuilderService } from 'src/app/services/form-builder.service';
+import { FormQuestion } from 'src/app/models/form-question.model';
 
 @Component({
   selector: 'app-step-form',
@@ -73,21 +74,18 @@ export class StepFormComponent implements OnInit {
     }
   }
 
-
   goToNextStep(): void {
     const currentPage = this.pages[this.currentPageIndex];
 
-    // Utility: Recursively flatten children
-    const flattenQuestions = (questions: any[]): any[] =>
+    const flattenQuestions = (questions: FormQuestion[]): FormQuestion[] =>
       questions.flatMap(q => [q, ...(q.children ? flattenQuestions(q.children) : [])]);
 
-    // Get all visible sections
     const visibleSections = currentPage.sections.filter(section =>
       this.formBuilderService.isSectionVisible(section, this.form)
     );
 
-    // Collect all questions (including repeated)
-    const allQuestions: { key: string; repeated?: boolean; baseKey?: string }[] = [];
+    // Collect real FormQuestions with repeat metadata
+    const allQuestions: { question: FormQuestion; key: string }[] = [];
 
     visibleSections.forEach(section => {
       if (section.repeatFor?.key) {
@@ -95,24 +93,22 @@ export class StepFormComponent implements OnInit {
         section.questions.forEach(question => {
           for (let i = 0; i < repeatCount; i++) {
             allQuestions.push({
-              key: `${question.key}_${i}`,
-              repeated: true,
-              baseKey: question.key
+              question,
+              key: `${question.key}_${i}`
             });
           }
         });
       } else {
-        allQuestions.push(...flattenQuestions(section.questions));
+        flattenQuestions(section.questions).forEach(q =>
+          allQuestions.push({ question: q, key: q.key })
+        );
       }
     });
 
     // Visibility + validation
-    allQuestions.forEach(q => {
-      const ctrl = this.form.get(q.key);
-      const isVisible = this.formBuilderService.isVisible(
-        q.repeated ? { key: q.key } : q,
-        this.form
-      );
+    allQuestions.forEach(({ question, key }) => {
+      const ctrl = this.form.get(key);
+      const isVisible = this.formBuilderService.isVisible(question, this.form);
 
       if (ctrl) {
         if (!isVisible) {
@@ -123,17 +119,15 @@ export class StepFormComponent implements OnInit {
       }
     });
 
-    // Check invalid visible controls
     const invalidControls = allQuestions
-      .map(q => this.form.get(q.key))
+      .map(({ key }) => this.form.get(key))
       .filter(ctrl => ctrl && ctrl.enabled && ctrl.invalid);
 
     if (invalidControls.length > 0) {
       invalidControls.forEach(ctrl => ctrl.markAsTouched());
-      return; // Prevent navigation
+      return;
     }
 
-    // Step logic
     switch (this.currentPageIndex) {
       case 0:
         this.calculatePremium();
@@ -148,8 +142,6 @@ export class StepFormComponent implements OnInit {
         break;
     }
   }
-
-
 
   goToPreviousStep(): void {
     if (this.currentPageIndex > 0) {

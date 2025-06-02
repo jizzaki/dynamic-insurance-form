@@ -20,6 +20,7 @@
                           <label class="form-label">{{ question.label }} {{ question.directive }}</label>
                           <input-with-directive [formControl]="ctrl" [directive]="question.directive"
                             [inputType]="question.inputType" [className]="'form-control'" [mask]="question.mask"
+                            [disabled]="ctrl.disabled"
                             [ngClass]="{ 'is-invalid': ctrl.invalid && (ctrl.touched || ctrl.dirty) }" />
                           <div class="invalid-feedback" *ngIf="ctrl.invalid && (ctrl.touched || ctrl.dirty)">This field
                             is
@@ -28,7 +29,7 @@
 
                         <div *ngSwitchCase="'textarea'">
                           <label class="form-label">{{ question.label }}</label>
-                          <textarea class="form-control" [formControl]="ctrl"
+                          <textarea class="form-control" [formControl]="ctrl" [disabled]="ctrl.disabled"
                             [ngClass]="{ 'is-invalid': ctrl.invalid && (ctrl.touched || ctrl.dirty) }"></textarea>
                           <div class="invalid-feedback" *ngIf="ctrl.invalid && (ctrl.touched || ctrl.dirty)">This field
                             is
@@ -37,12 +38,13 @@
 
                         <div *ngSwitchCase="'select'">
                           <label class="form-label">{{ question.label }}</label>
-                          <select class="form-select" [formControl]="ctrl"
+                          <select class="form-select" [formControl]="ctrl" [disabled]="ctrl.disabled"
                             [ngClass]="{ 'is-invalid': ctrl.invalid && (ctrl.touched || ctrl.dirty) }">
                             <option *ngFor="let opt of question.options" [value]="opt">{{ opt }}</option>
                           </select>
                           <div class="invalid-feedback" *ngIf="ctrl.invalid && (ctrl.touched || ctrl.dirty)">Please
-                            select an
+                            select
+                            an
                             option.</div>
                         </div>
 
@@ -50,11 +52,12 @@
                           <label class="form-label d-block">{{ question.label }}</label>
                           <div *ngFor="let opt of question.options" class="form-check">
                             <input type="radio" class="form-check-input" [value]="opt" [formControl]="ctrl"
-                              [id]="question.key + '_' + opt" />
+                              [disabled]="ctrl.disabled" [id]="question.key + '_' + opt" />
                             <label class="form-check-label" [for]="question.key + '_' + opt">{{ opt }}</label>
                           </div>
                           <div class="text-danger small" *ngIf="ctrl.invalid && (ctrl.touched || ctrl.dirty)">Please
-                            select an
+                            select
+                            an
                             option.</div>
                         </div>
 
@@ -62,7 +65,7 @@
                           <label class="form-label d-block">{{ question.label }}</label>
                           <div *ngFor="let opt of question.options" class="form-check">
                             <input type="checkbox" class="form-check-input" [checked]="ctrl.value?.includes(opt)"
-                              (change)="onCheckboxToggle(question.key, opt)" />
+                              [disabled]="ctrl.disabled" (change)="onCheckboxToggle(question.key, opt)" />
                             <label class="form-check-label">{{ opt }}</label>
                           </div>
                           <div class="text-danger small mt-1" *ngIf="ctrl.invalid && (ctrl.touched || ctrl.dirty)">
@@ -74,7 +77,8 @@
                           <label class="form-label">{{ question.label }}</label>
                           <input type="number" class="form-control" [formControl]="ctrl"
                             [ngClass]="{ 'is-invalid': ctrl.invalid && (ctrl.touched || ctrl.dirty) }"
-                            [attr.min]="question.min" [attr.max]="question.max" [attr.step]="question.step || 1" />
+                            [disabled]="ctrl.disabled" [attr.min]="question.min" [attr.max]="question.max"
+                            [attr.step]="question.step || 1" />
                           <div class="invalid-feedback" *ngIf="ctrl.invalid && (ctrl.touched || ctrl.dirty)">
                             Please enter a valid number.
                           </div>
@@ -98,6 +102,7 @@
                       <label class="form-label">{{ question.label }} {{ question.directive }}</label>
                       <input-with-directive [formControl]="ctrl" [directive]="question.directive"
                         [inputType]="question.inputType" [className]="'form-control'" [mask]="question.mask"
+                        [disabled]="ctrl.disabled"
                         [ngClass]="{ 'is-invalid': ctrl.invalid && (ctrl.touched || ctrl.dirty) }" />
                       <div class="invalid-feedback" *ngIf="ctrl.invalid && (ctrl.touched || ctrl.dirty)">This field is
                         required.</div>
@@ -105,7 +110,7 @@
 
                     <div *ngSwitchCase="'textarea'">
                       <label class="form-label">{{ question.label }}</label>
-                      <textarea class="form-control" [formControl]="ctrl"
+                      <textarea class="form-control" [formControl]="ctrl" [disabled]="ctrl.disabled"
                         [ngClass]="{ 'is-invalid': ctrl.invalid && (ctrl.touched || ctrl.dirty) }"></textarea>
                       <div class="invalid-feedback" *ngIf="ctrl.invalid && (ctrl.touched || ctrl.dirty)">This field is
                         required.</div>
@@ -113,7 +118,7 @@
 
                     <div *ngSwitchCase="'select'">
                       <label class="form-label">{{ question.label }}</label>
-                      <select class="form-select" [formControl]="ctrl"
+                      <select class="form-select" [formControl]="ctrl" [disabled]="ctrl.disabled"
                         [ngClass]="{ 'is-invalid': ctrl.invalid && (ctrl.touched || ctrl.dirty) }">
                         <option *ngFor="let opt of question.options" [value]="opt">{{ opt }}</option>
                       </select>
@@ -126,7 +131,7 @@
                       <label class="form-label d-block">{{ question.label }}</label>
                       <div *ngFor="let opt of question.options" class="form-check">
                         <input type="radio" class="form-check-input" [value]="opt" [formControl]="ctrl"
-                          [id]="question.key + '_' + opt" />
+                          [disabled]="ctrl.disabled" [id]="question.key + '_' + opt" />
                         <label class="form-check-label" [for]="question.key + '_' + opt">{{ opt }}</label>
                       </div>
                       <div class="text-danger small" *ngIf="ctrl.invalid && (ctrl.touched || ctrl.dirty)">Please select
@@ -138,7 +143,7 @@
                       <label class="form-label d-block">{{ question.label }}</label>
                       <div *ngFor="let opt of question.options" class="form-check">
                         <input type="checkbox" class="form-check-input" [checked]="ctrl.value?.includes(opt)"
-                          (change)="onCheckboxToggle(question.key, opt)" />
+                          [disabled]="ctrl.disabled" (change)="onCheckboxToggle(question.key, opt)" />
                         <label class="form-check-label">{{ opt }}</label>
                       </div>
                       <div class="text-danger small mt-1" *ngIf="ctrl.invalid && (ctrl.touched || ctrl.dirty)">
@@ -150,7 +155,8 @@
                       <label class="form-label">{{ question.label }}</label>
                       <input type="number" class="form-control" [formControl]="ctrl"
                         [ngClass]="{ 'is-invalid': ctrl.invalid && (ctrl.touched || ctrl.dirty) }"
-                        [attr.min]="question.min" [attr.max]="question.max" [attr.step]="question.step || 1" />
+                        [disabled]="ctrl.disabled" [attr.min]="question.min" [attr.max]="question.max"
+                        [attr.step]="question.step || 1" />
                       <div class="invalid-feedback" *ngIf="ctrl.invalid && (ctrl.touched || ctrl.dirty)">
                         Please enter a valid number.
                       </div>

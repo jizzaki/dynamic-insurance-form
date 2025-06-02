@@ -14,6 +14,7 @@ export interface FormQuestion {
   mask?: string;
   inputType?: string; // for things like 'email', 'tel', etc.
   directive?: string; // for custom directives if needed
+  disabled?: boolean;
 }
 
 export interface FormSection {
