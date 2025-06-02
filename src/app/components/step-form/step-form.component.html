@@ -182,34 +182,29 @@
             <ng-container *ngIf="formBuilderService.isSectionVisible(section, form)">
               <h5>{{ section.title }}</h5>
               <ul class="list-unstyled">
-                <ng-container *ngFor="let question of section.questions">
-                  <li *ngIf="formBuilderService.isVisible(question, form)">
-                    <strong>{{ question.label }}:</strong>
-                    <span>{{ getAnswerValue(question.key) }}</span>
-                  </li>
+                <ng-container *ngIf="section.repeatFor?.key as repeatKey; else nonRepeatingSummary">
+                  <ng-container *ngFor="let i of formBuilderService.getRepeatArray(form.get(repeatKey)?.value || 0)">
+                    <li *ngFor="let question of section.questions">
+                      <strong>{{ question.label }} {{ i + 1 }}:</strong>
+                      <span>{{ getAnswerValue(question.key + '_' + i) }}</span>
+                    </li>
+                  </ng-container>
                 </ng-container>
+
+                <ng-template #nonRepeatingSummary>
+                  <ng-container *ngFor="let question of section.questions">
+                    <li *ngIf="formBuilderService.isVisible(question, form)">
+                      <strong>{{ question.label }}:</strong>
+                      <span>{{ getAnswerValue(question.key) }}</span>
+                    </li>
+                  </ng-container>
+                </ng-template>
               </ul>
             </ng-container>
           </ng-container>
         </ng-container>
       </ng-container>
     </ng-container>
-
-
-    <!-- enable later
-    
-    <ng-container *ngIf="section.repeatFor; else nonRepeatingSummary"> 
-      <ng-container *ngFor="let i of formBuilderService.getRepeatArray(form.get(section.repeatFor.key)?.value || 0)">
-        <ul class="list-unstyled">
-          <ng-container *ngFor="let question of section.questions">
-            <li *ngIf="formBuilderService.isVisible(question, form)">
-              <strong>{{ question.label }} {{ i + 1 }}:</strong>
-              <span>{{ getAnswerValue(question.key, i) }}</span>
-            </li>
-          </ng-container>
-        </ul>
-      </ng-container>
-    </ng-container> -->
 
 
     <!-- Buttons here -->
