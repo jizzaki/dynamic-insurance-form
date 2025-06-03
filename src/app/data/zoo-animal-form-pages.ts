@@ -1,4 +1,5 @@
 import { ConditionalOperator } from '../enums/conditional-operator';
+import { MathOperands } from '../enums/math-operands';
 import { FormPage } from '../models/form-question.model';
 import { Validators } from '@angular/forms';
 
@@ -21,6 +22,27 @@ export const ZOO_ANIMAL_INSURANCE_FORM: FormPage[] = [
             type: 'checkbox-group',
             options: ['SD', 'LA', 'OC', 'SF'],
             validators: [Validators.required]
+          }
+        ]
+      },
+      {
+        title: 'Financial Info',
+        questions: [
+          { key: 'income', label: 'Income', type: 'number' },
+          { key: 'expenses', label: 'Expenses', type: 'number' },
+          {
+            key: 'netTotal',
+            label: 'Net Total',
+            type: 'number',
+            disabled: true,
+            math: {
+              operation: MathOperands.Subtract,
+              dependsOn: ['income', 'expenses'],
+              validationLogic: {
+                operator: ConditionalOperator.GreaterThan,
+                value: 0
+              }
+            }
           }
         ]
       },

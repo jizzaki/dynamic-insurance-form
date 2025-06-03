@@ -1,4 +1,5 @@
 import { ConditionalOperator } from "../enums/conditional-operator";
+import { MathOperands } from "../enums/math-operands";
 
 export interface FormQuestion {
   key: string;
@@ -14,6 +15,7 @@ export interface FormQuestion {
   inputType?: string; // for things like 'email', 'tel', etc.
   directive?: string; // for custom directives if needed
   disabled?: boolean;
+  math?: Math;        // Optional math-related metadata
 }
 
 export interface FormSection {
@@ -32,5 +34,14 @@ export interface ConditionalOn {
   key?: string;
   value?: any;
   operator?: ConditionalOperator;
-  conditions?: ConditionalOn[]; // for All/Any/Not
+  conditions?: ConditionalOn[];
+}
+
+export interface Math {
+  operation?: MathOperands;
+  dependsOn?: string[];
+  validationLogic?: {
+    operator: ConditionalOperator;
+    value: number;
+  };
 }

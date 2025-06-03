@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { ConditionalOn, FormQuestion, FormSection } from '../models/form-question.model';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { ConditionalOn, FormQuestion, FormSection, Math } from '../models/form-question.model';
 import { ConditionalOperator } from '../enums/conditional-operator';
+import { MathOperands } from '../enums/math-operands';
 
 @Injectable({ providedIn: 'root' })
 export class FormBuilderService {
@@ -47,6 +48,16 @@ export class FormBuilderService {
             question.validators || []
           );
 
+          // Inject dummy controls for math dependencies
+          if (question.math?.dependsOn?.length) {
+            question.math.dependsOn.forEach(depKey => {
+              if (!group[depKey]) {
+                group[depKey] = new FormControl(null);
+              }
+            });
+          }
+
+          // Process nested questions
           if (question.children) {
             const childGroup = this.buildForm([{ questions: question.children }]);
             Object.assign(group, childGroup.controls);
@@ -55,7 +66,31 @@ export class FormBuilderService {
       }
     }
 
-    return this.fb.group(group);
+    const formGroup = this.fb.group(group);
+
+    // Setup math subscriptions after form group is created
+    for (const section of sections) {
+      if (section.repeatFor) continue;
+
+      for (const question of section.questions) {
+        if (question.math?.dependsOn?.length) {
+          question.math.dependsOn.forEach(depKey => {
+            formGroup.get(depKey)?.valueChanges.subscribe(() => {
+              const newValue = this.computeMathValue(formGroup, question.math!);
+              formGroup.get(question.key)?.setValue(newValue, { emitEvent: false });
+              formGroup.get(question.key)?.updateValueAndValidity();
+            });
+          });
+
+          // Add validator if validation logic exists
+          if (question.math.validationLogic) {
+            formGroup.get(question.key)?.addValidators(this.mathValidator(question.math));
+          }
+        }
+      }
+    }
+
+    return formGroup;
   }
 
   isVisible(item: FormQuestion, form: FormGroup): boolean {
@@ -156,7 +191,6 @@ export class FormBuilderService {
     }
   }
 
-
   evaluateConditionalOn(cond: ConditionalOn, form: FormGroup): boolean {
     const operator = cond.operator ?? ConditionalOperator.Equals;
 
@@ -206,6 +240,53 @@ export class FormBuilderService {
 
   getRepeatArray(count: number): number[] {
     return Array.from({ length: count }, (_, i) => i);
+  }
+
+  calculateMathOperandTotal(operands: MathOperands[], values: number[]): number {
+    if (!values.length || values.length !== operands.length + 1) return 0;
+
+    return values.reduce((acc, val, i) => {
+      if (i === 0) return val;
+      const op = operands[i - 1];
+      switch (op) {
+        case MathOperands.Add: return acc + val;
+        case MathOperands.Subtract: return acc - val;
+        case MathOperands.Multiply: return acc * val;
+        case MathOperands.Divide: return acc / val;
+        default: return acc;
+      }
+    });
+  }
+
+  computeMathValue(form: FormGroup, math: Math): number {
+    const values = math.dependsOn?.map(key => +form.get(key)?.value || 0) || [];
+
+    switch (math.operation) {
+      case MathOperands.Add: return values.reduce((a, b) => a + b, 0);
+      case MathOperands.Subtract: return values.reduce((a, b) => a - b);
+      case MathOperands.Multiply: return values.reduce((a, b) => a * b, 1);
+      case MathOperands.Divide: return values.reduce((a, b) => a / (b || 1));
+      default: return 0;
+    }
+  }
+
+  mathValidator(math: Math) {
+    return (control: AbstractControl) => {
+      if (!math.validationLogic) return null;
+      const actualValue = Number(control.value);
+      const { operator, value: expected } = math.validationLogic;
+
+      switch (operator) {
+        case ConditionalOperator.Equals:
+          return actualValue === expected ? null : { mathValidation: true };
+        case ConditionalOperator.GreaterThan:
+          return actualValue > expected ? null : { mathValidation: true };
+        case ConditionalOperator.LessThan:
+          return actualValue < expected ? null : { mathValidation: true };
+        default:
+          return null;
+      }
+    };
   }
 
   private hasAllKeysFilled(cond: ConditionalOn, form: FormGroup): boolean {

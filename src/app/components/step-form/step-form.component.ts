@@ -183,16 +183,6 @@ export class StepFormComponent implements OnInit {
     return this.form.get(actualKey)?.value ?? '';
   }
 
-
-  getAnswerValueOld(key: string): string {
-    const value = this.form.get(key)?.value;
-    if (Array.isArray(value)) {
-      return value.join(', ');
-    }
-    return value ?? '';
-  }
-
-
   processPayment(): void {
     this.paymentLoading = true;
     this.paymentError = '';
