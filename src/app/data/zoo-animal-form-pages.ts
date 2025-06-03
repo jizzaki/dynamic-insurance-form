@@ -52,7 +52,7 @@ export const ZOO_ANIMAL_INSURANCE_FORM: FormPage[] = [
           { key: 'animalPrice', label: 'Animal Price', type: 'text', directive: "appCurrencyFormatter", validators: [Validators.required] },
           { key: 'wantsExtended', label: 'Would you like extended coverage?', type: 'radio', options: ['Yes', 'No'], validators: [Validators.required] },
           { key: 'tigersAreOld', label: 'Are your tigers seniors?', type: 'radio', options: ['Yes', 'No'], validators: [Validators.required] },
-          { key: 'numberOfTigers', label: 'How many tigers do you have?', type: 'number', validators: [Validators.required] },
+          { key: 'numberOfTigers', label: 'How many tigers do you have?', type: 'number', min: 0, max: 10, validators: [Validators.required] },
         ],
       },
       {

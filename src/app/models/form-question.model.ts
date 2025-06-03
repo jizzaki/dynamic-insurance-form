@@ -16,6 +16,8 @@ export interface FormQuestion {
   inputType?: string; // for things like 'email', 'tel', etc.
   directive?: string; // for custom directives if needed
   disabled?: boolean;
+  min?: number;  // Minimum number length
+  max?: number;  // Maximum number length
   math?: Math;        // Optional math-related metadata
 }
 

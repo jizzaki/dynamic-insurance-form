@@ -230,4 +230,13 @@ export class StepFormComponent implements OnInit {
       control.setValue([...current, value]);
     }
   }
+
+  onClampValue(ctrl: FormControl, min?: number, max?: number) {
+    const value = Number(ctrl.value);
+    if (isNaN(value)) return;
+
+    if (min !== undefined && value < min) ctrl.setValue(min);
+    if (max !== undefined && value > max) ctrl.setValue(max);
+  }
+
 }

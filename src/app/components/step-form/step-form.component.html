@@ -91,10 +91,13 @@
                             [attr.min]="question.min" 
                             [attr.max]="question.max"
                             [readonly]="question.math != null"
-                            [attr.step]="question.step || 1" />
+                            [attr.step]="question.step || 1"
+                            (blur)="onClampValue(ctrl, question.min, question.max)" />
                           <div class="invalid-feedback" *ngIf="ctrl.invalid && (ctrl.touched || ctrl.dirty)">
                               <ng-container *ngIf="ctrl.errors?.['required']">This field is required.</ng-container>
                               <ng-container *ngIf="ctrl.errors?.['mathValidation']">{{ ctrl.errors['mathValidation'] }}</ng-container>
+                              <ng-container *ngIf="ctrl.errors?.['min']">Minimum allowed is {{ question.min }}.</ng-container>
+                              <ng-container *ngIf="ctrl.errors?.['max']">Maximum allowed is {{ question.max }}.</ng-container>
                             </div>
                         </div>
 
@@ -190,10 +193,13 @@
                         [attr.min]="question.min" 
                         [attr.max]="question.max"
                         [readonly]="question.math != null"
-                        [attr.step]="question.step || 1" />
+                        [attr.step]="question.step || 1"
+                        (blur)="onClampValue(ctrl, question.min, question.max)" />
                       <div class="invalid-feedback" *ngIf="ctrl.invalid && (ctrl.touched || ctrl.dirty)">
                           <ng-container *ngIf="ctrl.errors?.['required']">This field is required.</ng-container>
                           <ng-container *ngIf="ctrl.errors?.['mathValidation']">{{ ctrl.errors['mathValidation'] }}</ng-container>
+                          <ng-container *ngIf="ctrl.errors?.['min']">Minimum allowed is {{ question.min }}.</ng-container>
+                          <ng-container *ngIf="ctrl.errors?.['max']">Maximum allowed is {{ question.max }}.</ng-container>
                         </div>
                     </div>
 
