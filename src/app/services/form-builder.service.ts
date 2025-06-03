@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { AbstractControl, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { ConditionalOn, FormQuestion, FormSection, Math } from '../models/form-question.model';
 import { ConditionalOperator } from '../enums/conditional-operator';
 import { MathOperands } from '../enums/math-operands';
@@ -8,11 +8,10 @@ import { MathOperands } from '../enums/math-operands';
 export class FormBuilderService {
   constructor(private fb: FormBuilder) { }
 
-  buildForm(sections: any[], form?: FormGroup): FormGroup {
+  buildForm(sections: FormSection[], form?: FormGroup): FormGroup {
     const group: Record<string, FormControl> = {};
 
     for (const section of sections) {
-      // Skip if section.questions is not an array
       if (!Array.isArray(section.questions)) {
         console.warn('Invalid section.questions:', section);
         continue;
@@ -43,12 +42,17 @@ export class FormBuilderService {
         for (const question of section.questions) {
           const initialValue = question.type === 'checkbox-group' ? [] : null;
 
+          const validators = question.validators ? [...question.validators] : [];
           group[question.key] = new FormControl(
             { value: initialValue, disabled: !!question.conditionalOn || !!question.disabled },
-            question.validators || []
+            validators
           );
 
-          // Inject dummy controls for math dependencies
+          if (question.key === 'netTotal') {
+            console.log(group[question.key])
+          }
+          
+
           if (question.math?.dependsOn?.length) {
             question.math.dependsOn.forEach(depKey => {
               if (!group[depKey]) {
@@ -57,7 +61,6 @@ export class FormBuilderService {
             });
           }
 
-          // Process nested questions
           if (question.children) {
             const childGroup = this.buildForm([{ questions: question.children }]);
             Object.assign(group, childGroup.controls);
@@ -68,24 +71,22 @@ export class FormBuilderService {
 
     const formGroup = this.fb.group(group);
 
-    // Setup math subscriptions after form group is created
     for (const section of sections) {
       if (section.repeatFor) continue;
 
       for (const question of section.questions) {
         if (question.math?.dependsOn?.length) {
+          const updateComputedValue = () => {
+            const newValue = this.computeMathValue(formGroup, question.math!);
+            formGroup.get(question.key)?.setValue(newValue, { emitEvent: true });
+            formGroup.get(question.key)?.updateValueAndValidity();
+          };
+
           question.math.dependsOn.forEach(depKey => {
-            formGroup.get(depKey)?.valueChanges.subscribe(() => {
-              const newValue = this.computeMathValue(formGroup, question.math!);
-              formGroup.get(question.key)?.setValue(newValue, { emitEvent: false });
-              formGroup.get(question.key)?.updateValueAndValidity();
-            });
+            formGroup.get(depKey)?.valueChanges.subscribe(updateComputedValue);
           });
 
-          // Add validator if validation logic exists
-          if (question.math.validationLogic) {
-            formGroup.get(question.key)?.addValidators(this.mathValidator(question.math));
-          }
+          updateComputedValue();
         }
       }
     }
@@ -259,30 +260,33 @@ export class FormBuilderService {
   }
 
   computeMathValue(form: FormGroup, math: Math): number {
-    const values = math.dependsOn?.map(key => +form.get(key)?.value || 0) || [];
-
+    const values = math.dependsOn.map(key => Number(form.get(key)?.value || 0));
     switch (math.operation) {
-      case MathOperands.Add: return values.reduce((a, b) => a + b, 0);
-      case MathOperands.Subtract: return values.reduce((a, b) => a - b);
-      case MathOperands.Multiply: return values.reduce((a, b) => a * b, 1);
-      case MathOperands.Divide: return values.reduce((a, b) => a / (b || 1));
-      default: return 0;
+      case MathOperands.Add:
+        return values.reduce((acc, val) => acc + val, 0);
+      case MathOperands.Subtract:
+        return values.reduce((acc, val) => acc - val);
+      case MathOperands.Multiply:
+        return values.reduce((acc, val) => acc * val, 1);
+      case MathOperands.Divide:
+        return values.reduce((acc, val) => acc / (val || 1));
+      default:
+        return 0;
     }
   }
 
-  mathValidator(math: Math) {
-    return (control: AbstractControl) => {
-      if (!math.validationLogic) return null;
+  mathValidator(operator: ConditionalOperator, value: number): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
       const actualValue = Number(control.value);
-      const { operator, value: expected } = math.validationLogic;
+      const expected = value;
 
       switch (operator) {
         case ConditionalOperator.Equals:
-          return actualValue === expected ? null : { mathValidation: true };
+          return actualValue === expected ? null : { mathValidation: `Expected ${expected}` };
         case ConditionalOperator.GreaterThan:
-          return actualValue > expected ? null : { mathValidation: true };
+          return actualValue > expected ? null : { mathValidation: `Must be greater than ${expected}` };
         case ConditionalOperator.LessThan:
-          return actualValue < expected ? null : { mathValidation: true };
+          return actualValue < expected ? null : { mathValidation: `Must be less than ${expected}` };
         default:
           return null;
       }

@@ -2,6 +2,7 @@ import { ConditionalOperator } from '../enums/conditional-operator';
 import { MathOperands } from '../enums/math-operands';
 import { FormPage } from '../models/form-question.model';
 import { Validators } from '@angular/forms';
+import { MathValidator } from '../validators/math.validator';
 
 export const ZOO_ANIMAL_INSURANCE_FORM: FormPage[] = [
   {
@@ -34,14 +35,13 @@ export const ZOO_ANIMAL_INSURANCE_FORM: FormPage[] = [
             key: 'netTotal',
             label: 'Net Total',
             type: 'number',
-            disabled: true,
+            disabled: false,
+            validators: [ 
+              MathValidator.validate(ConditionalOperator.GreaterThan, 0)
+            ],
             math: {
               operation: MathOperands.Subtract,
               dependsOn: ['income', 'expenses'],
-              validationLogic: {
-                operator: ConditionalOperator.GreaterThan,
-                value: 0
-              }
             }
           }
         ]
@@ -53,8 +53,6 @@ export const ZOO_ANIMAL_INSURANCE_FORM: FormPage[] = [
           { key: 'animalPrice', label: 'Animal Price', type: 'text', directive: "appCurrencyFormatter", validators: [Validators.required] },
           { key: 'wantsExtended', label: 'Would you like extended coverage?', type: 'radio', options: ['Yes', 'No'], validators: [Validators.required] },
           { key: 'tigersAreOld', label: 'Are your tigers seniors?', type: 'radio', options: ['Yes', 'No'], validators: [Validators.required] },
-          { key: 'tigerCareTakers', label: 'Care takers?', type: 'radio', options: ['Yes', 'No'], validators: [Validators.required] },
-          { key: 'bigerCareTakers', label: 'Care takers tuli?', type: 'radio', options: ['Yes', 'No'], validators: [Validators.required] },
           { key: 'numberOfTigers', label: 'How many tigers do you have?', type: 'number', validators: [Validators.required] },
         ],
       },
@@ -70,20 +68,15 @@ export const ZOO_ANIMAL_INSURANCE_FORM: FormPage[] = [
       {
         title: 'Old Tigers Only Questionnaire',
         conditionalOn: {
-          operator: ConditionalOperator.Not,
+          operator: ConditionalOperator.All,
           conditions: [
-            {
-              operator: ConditionalOperator.Any,
-              conditions: [
-                { key: 'numberOfTigers', operator: ConditionalOperator.GreaterThanOrEqual, value: 5 },
-                { key: 'tigersAreOld', operator: ConditionalOperator.Equals, value: 'Yes' }
-              ]
-            }
+            { key: 'numberOfTigers', operator: ConditionalOperator.GreaterThan, value: 0 },
+            { key: 'tigersAreOld', operator: ConditionalOperator.Equals, value: 'Yes' }
           ]
         },
         questions: [
-          { key: 'animalName', label: 'Name of Tiger', type: 'text', validators: [Validators.required] },
-          { key: 'animalAge', label: 'Age of Tiger', type: 'text', validators: [Validators.required] },
+          { key: 'animalName', label: 'Where was the tiger born?', type: 'text', validators: [Validators.required] },
+          { key: 'animalAge', label: 'Name of the original owner?', type: 'text', validators: [Validators.required] },
         ]
       },
       {
