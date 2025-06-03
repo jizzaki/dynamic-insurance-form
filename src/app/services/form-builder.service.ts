@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ConditionalOn, FormQuestion, FormSection, Math } from '../models/form-question.model';
 import { ConditionalOperator } from '../enums/conditional-operator';
 import { MathOperands } from '../enums/math-operands';
@@ -47,11 +47,6 @@ export class FormBuilderService {
             { value: initialValue, disabled: !!question.conditionalOn || !!question.disabled },
             validators
           );
-
-          if (question.key === 'netTotal') {
-            console.log(group[question.key])
-          }
-          
 
           if (question.math?.dependsOn?.length) {
             question.math.dependsOn.forEach(depKey => {
@@ -273,24 +268,6 @@ export class FormBuilderService {
       default:
         return 0;
     }
-  }
-
-  mathValidator(operator: ConditionalOperator, value: number): ValidatorFn {
-    return (control: AbstractControl): ValidationErrors | null => {
-      const actualValue = Number(control.value);
-      const expected = value;
-
-      switch (operator) {
-        case ConditionalOperator.Equals:
-          return actualValue === expected ? null : { mathValidation: `Expected ${expected}` };
-        case ConditionalOperator.GreaterThan:
-          return actualValue > expected ? null : { mathValidation: `Must be greater than ${expected}` };
-        case ConditionalOperator.LessThan:
-          return actualValue < expected ? null : { mathValidation: `Must be less than ${expected}` };
-        default:
-          return null;
-      }
-    };
   }
 
   private hasAllKeysFilled(cond: ConditionalOn, form: FormGroup): boolean {

@@ -35,7 +35,7 @@ export const ZOO_ANIMAL_INSURANCE_FORM: FormPage[] = [
             key: 'netTotal',
             label: 'Net Total',
             type: 'number',
-            disabled: false,
+            disabled: true,
             validators: [ 
               MathValidator.validate(ConditionalOperator.GreaterThan, 0)
             ],

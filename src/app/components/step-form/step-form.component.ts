@@ -50,7 +50,6 @@ export class StepFormComponent implements OnInit {
         });
     });
 
-    console.log(this.form.controls)
   }
 
   handleRepeatSection(section: any, count: number): void {
