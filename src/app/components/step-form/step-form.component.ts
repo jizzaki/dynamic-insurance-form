@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ZOO_ANIMAL_INSURANCE_FORM } from 'src/app/data/zoo-animal-form-pages';
 import { FormBuilderService } from 'src/app/services/form-builder.service';
@@ -49,6 +49,7 @@ export class StepFormComponent implements OnInit {
           }
         });
     });
+
   }
 
   handleRepeatSection(section: any, count: number): void {
@@ -239,5 +240,4 @@ export class StepFormComponent implements OnInit {
       control.setValue([...current, value]);
     }
   }
-
 }

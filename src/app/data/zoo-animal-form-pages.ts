@@ -15,6 +15,13 @@ export const ZOO_ANIMAL_INSURANCE_FORM: FormPage[] = [
           { key: 'state', label: 'State', type: 'select', options: ['CA', 'TX', 'NY', 'FL'], validators: [Validators.required] },
           { key: 'zip', label: 'Zip Code', type: 'text', directive: "appZipCodeFormatter", conditionalOn: { key: 'state', operator: ConditionalOperator.In, value: ['CA', 'FL'] }, validators: [Validators.required] },
           { key: 'policyStartDate', label: 'Policy Start Date', type: 'text', directive: "appDateFormatter", validators: [Validators.required] },
+          {
+            key: 'zooLocation',
+            label: 'Select which city you prefer your animals to be transported to?',
+            type: 'checkbox-group',
+            options: ['SD', 'LA', 'OC', 'SF'],
+            validators: [Validators.required]
+          }
         ]
       },
       {
@@ -24,6 +31,8 @@ export const ZOO_ANIMAL_INSURANCE_FORM: FormPage[] = [
           { key: 'animalPrice', label: 'Animal Price', type: 'text', directive: "appCurrencyFormatter", validators: [Validators.required] },
           { key: 'wantsExtended', label: 'Would you like extended coverage?', type: 'radio', options: ['Yes', 'No'], validators: [Validators.required] },
           { key: 'tigersAreOld', label: 'Are your tigers seniors?', type: 'radio', options: ['Yes', 'No'], validators: [Validators.required] },
+          { key: 'tigerCareTakers', label: 'Care takers?', type: 'radio', options: ['Yes', 'No'], validators: [Validators.required] },
+          { key: 'bigerCareTakers', label: 'Care takers tuli?', type: 'radio', options: ['Yes', 'No'], validators: [Validators.required] },
           { key: 'numberOfTigers', label: 'How many tigers do you have?', type: 'number', validators: [Validators.required] },
         ],
       },
