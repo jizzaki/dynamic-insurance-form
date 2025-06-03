@@ -79,14 +79,23 @@
 
                         <div *ngSwitchCase="'number'">
                           <label class="form-label">{{ question.label }}</label>
-                          <input type="number" class="form-control" [formControl]="ctrl"
-                            [ngClass]="{ 'is-invalid': ctrl.invalid && (ctrl.touched || ctrl.dirty) }"
-                            [disabled]="ctrl.disabled" [attr.min]="question.min" [attr.max]="question.max"
+                          <input 
+                            type="number" 
+                            class="form-control" 
+                            [formControl]="ctrl"
+                            [ngClass]="{
+                              'is-invalid': ctrl.invalid && (ctrl.touched || ctrl.dirty),
+                              'bg-light': question.math
+                            }"
+                            [disabled]="ctrl.disabled" 
+                            [attr.min]="question.min" 
+                            [attr.max]="question.max"
+                            [readonly]="question.math != null"
                             [attr.step]="question.step || 1" />
                           <div class="invalid-feedback" *ngIf="ctrl.invalid && (ctrl.touched || ctrl.dirty)">
-                            <ng-container *ngIf="ctrl.errors?.['required']">This field is required.</ng-container>
-                            <ng-container *ngIf="ctrl.errors?.['mathValidation']">{{ ctrl.errors['mathValidation'] }}</ng-container>
-                          </div>
+                              <ng-container *ngIf="ctrl.errors?.['required']">This field is required.</ng-container>
+                              <ng-container *ngIf="ctrl.errors?.['mathValidation']">{{ ctrl.errors['mathValidation'] }}</ng-container>
+                            </div>
                         </div>
 
                       </div>
@@ -169,9 +178,18 @@
 
                     <div *ngSwitchCase="'number'">
                       <label class="form-label">{{ question.label }}</label>
-                      <input type="number" class="form-control" [formControl]="ctrl"
-                        [ngClass]="{ 'is-invalid': ctrl.invalid && (ctrl.touched || ctrl.dirty) }"
-                        [disabled]="ctrl.disabled" [attr.min]="question.min" [attr.max]="question.max"
+                      <input 
+                        type="number" 
+                        class="form-control" 
+                        [formControl]="ctrl"
+                        [ngClass]="{
+                          'is-invalid': ctrl.invalid && (ctrl.touched || ctrl.dirty),
+                          'bg-light': question.math
+                        }"
+                        [disabled]="ctrl.disabled" 
+                        [attr.min]="question.min" 
+                        [attr.max]="question.max"
+                        [readonly]="question.math != null"
                         [attr.step]="question.step || 1" />
                       <div class="invalid-feedback" *ngIf="ctrl.invalid && (ctrl.touched || ctrl.dirty)">
                           <ng-container *ngIf="ctrl.errors?.['required']">This field is required.</ng-container>
