@@ -4,10 +4,10 @@ import { FormPage } from '../models/form-question.model';
 import { Validators } from '@angular/forms';
 import { MathValidator } from '../validators/math.validator';
 import { StateListOptions } from '../enums/state-list';
-import { YesOrNoListOptions } from '../enums/yes-or-no-list';
-import { AnimalTypesOptions } from '../enums/animal-types';
+import { YesNo, YesNoOptions } from '../enums/yes-no';
 import { PaymentTypesOptions } from '../enums/payment-types';
 import { ExtendedCoverageTypesOptions } from '../enums/extended-coverage-types';
+import { AnimalTypesOptions } from '../enums/animal-types';
 
 export const ZOO_ANIMAL_INSURANCE_FORM: FormPage[] = [
   {
@@ -48,8 +48,8 @@ export const ZOO_ANIMAL_INSURANCE_FORM: FormPage[] = [
         questions: [
           { key: 'animalType', label: 'Animal Type', type: 'select', options: AnimalTypesOptions, validators: [Validators.required] },
           { key: 'animalPrice', label: 'Animal Price', type: 'text', directive: "appCurrencyFormatter", validators: [Validators.required] },
-          { key: 'wantsExtended', label: 'Would you like extended coverage?', type: 'radio', options: YesOrNoListOptions, validators: [Validators.required] },
-          { key: 'tigersAreOld', label: 'Are your tigers seniors?', type: 'radio', options: YesOrNoListOptions, validators: [Validators.required] },
+          { key: 'wantsExtended', label: 'Would you like extended coverage?', type: 'radio', options: YesNoOptions, validators: [Validators.required] },
+          { key: 'tigersAreOld', label: 'Are your tigers seniors?', type: 'radio', options: YesNoOptions, validators: [Validators.required] },
           { key: 'numberOfTigers', label: 'How many tigers do you have?', type: 'number', min: 0, max: 10, validators: [Validators.required] },
         ],
       },
@@ -68,7 +68,7 @@ export const ZOO_ANIMAL_INSURANCE_FORM: FormPage[] = [
           operator: ConditionalOperator.All,
           conditions: [
             { key: 'numberOfTigers', operator: ConditionalOperator.GreaterThan, value: 0 },
-            { key: 'tigersAreOld', operator: ConditionalOperator.Equals, value: 'Yes' }
+            { key: 'tigersAreOld', operator: ConditionalOperator.Equals, value: YesNo.Yes }
           ]
         },
         questions: [
@@ -78,7 +78,7 @@ export const ZOO_ANIMAL_INSURANCE_FORM: FormPage[] = [
       },
       {
         title: 'Extended Coverage Questionnaire',
-        conditionalOn: { key: 'wantsExtended', value: 'Yes' },
+        conditionalOn: { key: 'wantsExtended', value: YesNo.Yes },
         questions: [
           {
             key: 'extendedCoverageReason',

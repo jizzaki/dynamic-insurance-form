@@ -1,13 +1,23 @@
 import { FormOption } from "../models/form-question.model";
 
-export const EXTENDED_COVERAGE_TYPES = [
-  { code: 'dental', name: 'Dental' },
-  { code: 'vision', name: 'Vision' },
-  { code: 'injury', name: 'Injury' },
-  { code: 'transport', name: 'Transport' },
-];
+export enum ExtendedCoverageTypes {
+  Dental,
+  Vision,
+  Injury,
+  Transport,
+}
 
-export const ExtendedCoverageTypesOptions: FormOption[] = EXTENDED_COVERAGE_TYPES.map(item => ({
-  label: item.name,
-  value: item.code
-}));
+export const ExtendedCoverageTypesMap = new Map<ExtendedCoverageTypes, string>([
+  [ExtendedCoverageTypes.Dental, 'Dental'],
+  [ExtendedCoverageTypes.Vision, 'Vision'],
+  [ExtendedCoverageTypes.Injury, 'Injury'],
+  [ExtendedCoverageTypes.Transport, 'Transport'],
+]);
+
+
+export const ExtendedCoverageTypesOptions: FormOption[] = Array.from(ExtendedCoverageTypesMap.entries()).map(
+  ([key, value]) => ({
+    label: value,
+    value: key
+  })
+);

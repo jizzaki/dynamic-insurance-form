@@ -1,11 +1,18 @@
 import { FormOption } from "../models/form-question.model";
 
-export const PAYMENT_TYPES = [
-  { code: 'CC', name: 'Credit Card' },
-  { code: 'ACH', name: 'ACH' },
-];
+export enum PaymentTypes {
+  CreditCard,
+  ACH,
+}
 
-export const PaymentTypesOptions: FormOption[] = PAYMENT_TYPES.map(item => ({
-  label: item.name,
-  value: item.code
-}));
+export const PaymentTypesMap = new Map<PaymentTypes, string>([
+  [PaymentTypes.CreditCard, 'Credit Card'],
+  [PaymentTypes.ACH, 'ACH'],
+]);
+
+export const PaymentTypesOptions: FormOption[] = Array.from(PaymentTypesMap.entries()).map(
+  ([key, value]) => ({
+    label: value,
+    value: key
+  })
+);
