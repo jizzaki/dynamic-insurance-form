@@ -3,6 +3,11 @@ import { MathOperands } from '../enums/math-operands';
 import { FormPage } from '../models/form-question.model';
 import { Validators } from '@angular/forms';
 import { MathValidator } from '../validators/math.validator';
+import { StateListOptions } from '../enums/state-list';
+import { YesOrNoListOptions } from '../enums/yes-or-no-list';
+import { AnimalTypesOptions } from '../enums/animal-types';
+import { PaymentTypesOptions } from '../enums/payment-types';
+import { ExtendedCoverageTypesOptions } from '../enums/extended-coverage-types';
 
 export const ZOO_ANIMAL_INSURANCE_FORM: FormPage[] = [
   {
@@ -14,16 +19,9 @@ export const ZOO_ANIMAL_INSURANCE_FORM: FormPage[] = [
           { key: 'name', label: 'Name', type: 'text', validators: [Validators.required] },
           { key: 'address', label: 'Address', type: 'text', validators: [Validators.required] },
           { key: 'phone', label: 'Phone Number', type: 'text', inputType: "tel", directive: "appPhoneNumberFormatter", validators: [Validators.required] },
-          { key: 'state', label: 'State', type: 'select', options: ['CA', 'TX', 'NY', 'FL'], validators: [Validators.required] },
+          { key: 'state', label: 'State', type: 'select', options: StateListOptions, validators: [Validators.required] },
           { key: 'zip', label: 'Zip Code', type: 'text', directive: "appZipCodeFormatter", conditionalOn: { key: 'state', operator: ConditionalOperator.In, value: ['CA', 'FL'] }, validators: [Validators.required] },
           { key: 'policyStartDate', label: 'Policy Start Date', type: 'text', directive: "appDateFormatter", validators: [Validators.required] },
-          {
-            key: 'zooLocation',
-            label: 'Select which city you prefer your animals to be transported to?',
-            type: 'checkbox-group',
-            options: ['SD', 'LA', 'OC', 'SF'],
-            validators: [Validators.required]
-          }
         ]
       },
       {
@@ -48,10 +46,10 @@ export const ZOO_ANIMAL_INSURANCE_FORM: FormPage[] = [
       {
         title: 'Animal Details',
         questions: [
-          { key: 'animalType', label: 'Animal Type', type: 'select', options: ['Lion', 'Tiger', 'Zebra'], validators: [Validators.required] },
+          { key: 'animalType', label: 'Animal Type', type: 'select', options: AnimalTypesOptions, validators: [Validators.required] },
           { key: 'animalPrice', label: 'Animal Price', type: 'text', directive: "appCurrencyFormatter", validators: [Validators.required] },
-          { key: 'wantsExtended', label: 'Would you like extended coverage?', type: 'radio', options: ['Yes', 'No'], validators: [Validators.required] },
-          { key: 'tigersAreOld', label: 'Are your tigers seniors?', type: 'radio', options: ['Yes', 'No'], validators: [Validators.required] },
+          { key: 'wantsExtended', label: 'Would you like extended coverage?', type: 'radio', options: YesOrNoListOptions, validators: [Validators.required] },
+          { key: 'tigersAreOld', label: 'Are your tigers seniors?', type: 'radio', options: YesOrNoListOptions, validators: [Validators.required] },
           { key: 'numberOfTigers', label: 'How many tigers do you have?', type: 'number', min: 0, max: 10, validators: [Validators.required] },
         ],
       },
@@ -92,7 +90,7 @@ export const ZOO_ANIMAL_INSURANCE_FORM: FormPage[] = [
             key: 'extendedCoverageOptions',
             label: 'Select the types of coverage you want',
             type: 'checkbox-group',
-            options: ['Dental', 'Vision', 'Injury', 'Transport'],
+            options: ExtendedCoverageTypesOptions,
             validators: [Validators.required]
           }
         ]
@@ -110,7 +108,7 @@ export const ZOO_ANIMAL_INSURANCE_FORM: FormPage[] = [
       {
         title: 'Payment Details',
         questions: [
-          { key: 'paymentType', label: 'Payment Method', type: 'select', options: ['Credit Card', 'ACH'], validators: [Validators.required] },
+          { key: 'paymentType', label: 'Payment Method', type: 'select', options: PaymentTypesOptions, validators: [Validators.required] },
           { key: 'accountNumber', label: 'Account/Card Number', type: 'text', validators: [Validators.required] },
           { key: 'expirationDate', label: 'Expiration Date', type: 'text', validators: [Validators.required] },
           { key: 'routingNumber', label: 'Routing Number', type: 'text', validators: [Validators.required] }

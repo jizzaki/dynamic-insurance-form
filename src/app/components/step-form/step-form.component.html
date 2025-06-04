@@ -42,7 +42,7 @@
                           <label class="form-label">{{ question.label }}</label>
                           <select class="form-select" [formControl]="ctrl" [disabled]="ctrl.disabled"
                             [ngClass]="{ 'is-invalid': ctrl.invalid && (ctrl.touched || ctrl.dirty) }">
-                            <option *ngFor="let opt of question.options" [value]="opt">{{ opt }}</option>
+                            <option *ngFor="let opt of question.options" [value]="opt.value">{{ opt.label }}</option>
                           </select>
                           <div class="invalid-feedback" *ngIf="ctrl.invalid && (ctrl.touched || ctrl.dirty)">Please
                             select
@@ -53,11 +53,11 @@
                         <div *ngSwitchCase="'radio'">
                           <label class="form-label d-block">{{ question.label }}</label>
                           <div *ngFor="let opt of question.options" class="form-check">
-                            <input type="radio" class="form-check-input" [value]="opt" [formControl]="ctrl"
+                            <input type="radio" class="form-check-input" [value]="opt.value" [formControl]="ctrl"
                               [disabled]="ctrl.disabled" [attr.name]="question.key + '_' + i"
-                              [id]="question.key + '_' + i + '_' + opt" />
-                            <label class="form-check-label" [for]="question.key + '_' + i + '_' + opt">
-                              {{ opt }}
+                              [id]="question.key + '_' + i + '_' + opt.value" />
+                            <label class="form-check-label" [for]="question.key + '_' + i + '_' + opt.value">
+                              {{ opt.label }}
                             </label>
                           </div>
                           <div class="text-danger small" *ngIf="ctrl.invalid && (ctrl.touched || ctrl.dirty)">
@@ -68,9 +68,9 @@
                         <div *ngSwitchCase="'checkbox-group'">
                           <label class="form-label d-block">{{ question.label }}</label>
                           <div *ngFor="let opt of question.options" class="form-check">
-                            <input type="checkbox" class="form-check-input" [checked]="ctrl.value?.includes(opt)"
-                              [disabled]="ctrl.disabled" (change)="onCheckboxToggle(question.key, opt)" />
-                            <label class="form-check-label">{{ opt }}</label>
+                            <input type="checkbox" class="form-check-input" [checked]="ctrl.value?.includes(opt.value)"
+                              [disabled]="ctrl.disabled" (change)="onCheckboxToggle(question.key, opt.value)" />
+                            <label class="form-check-label">{{ opt.label }}</label>
                           </div>
                           <div class="text-danger small mt-1" *ngIf="ctrl.invalid && (ctrl.touched || ctrl.dirty)">
                             Please select at least one option.
@@ -139,7 +139,7 @@
                       <label class="form-label">{{ question.label }}</label>
                       <select class="form-select" [formControl]="ctrl" [disabled]="ctrl.disabled"
                         [ngClass]="{ 'is-invalid': ctrl.invalid && (ctrl.touched || ctrl.dirty) }">
-                        <option *ngFor="let opt of question.options" [value]="opt">{{ opt }}</option>
+                        <option *ngFor="let opt of question.options" [value]="opt.value">{{ opt.label }}</option>
                       </select>
                       <div class="invalid-feedback" *ngIf="ctrl.invalid && (ctrl.touched || ctrl.dirty)">Please select
                         an
@@ -154,12 +154,12 @@
                           <input
                             type="radio"
                             class="form-check-input"
-                            [value]="opt"
+                            [value]="opt.value"
                             [formControl]="ctrl"
                             [name]="question.key + '_radio_group'" 
-                            [id]="question.key + '_' + opt"
+                            [id]="question.key + '_' + opt.value"
                           />
-                          <label class="form-check-label" [for]="question.key + '_' + opt">{{ opt }}</label>
+                          <label class="form-check-label" [for]="question.key + '_' + opt.value">{{ opt.label }}</label>
                         </div>
                       </ng-container>
                       <div class="text-danger small" *ngIf="ctrl.invalid && (ctrl.touched || ctrl.dirty)">
@@ -170,9 +170,9 @@
                     <div *ngSwitchCase="'checkbox-group'">
                       <label class="form-label d-block">{{ question.label }}</label>
                       <div *ngFor="let opt of question.options" class="form-check">
-                        <input type="checkbox" class="form-check-input" [checked]="ctrl.value?.includes(opt)"
-                          [disabled]="ctrl.disabled" (change)="onCheckboxToggle(question.key, opt)" />
-                        <label class="form-check-label">{{ opt }}</label>
+                        <input type="checkbox" class="form-check-input" [checked]="ctrl.value?.includes(opt.value)"
+                          [disabled]="ctrl.disabled" (change)="onCheckboxToggle(question.key, opt.value)" />
+                        <label class="form-check-label">{{ opt.label }}</label>
                       </div>
                       <div class="text-danger small mt-1" *ngIf="ctrl.invalid && (ctrl.touched || ctrl.dirty)">
                         Please select at least one option.

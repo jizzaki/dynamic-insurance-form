@@ -6,18 +6,18 @@ export interface FormQuestion {
   key: string;
   label: string;
   type: 'text' | 'radio' | 'textarea' | 'select' | 'group' | 'checkbox-group' | 'number';
-  options?: string[];
-  children?: FormQuestion[]; // nested dynamic questions
+  options?: FormOption[];
+  children?: FormQuestion[]; // Nested dynamic questions
   conditionalOn?: ConditionalOn;
   validators?: any[];
   onBlur?: string;
-  multiple?: boolean; // for checkbox-group
+  multiple?: boolean; // For checkbox-group
   mask?: string;
-  inputType?: string; // for things like 'email', 'tel', etc.
-  directive?: string; // for custom directives if needed
+  inputType?: string; // For things like 'email', 'tel', etc.
+  directive?: string; // For custom directives if needed
   disabled?: boolean;
-  min?: number;  // Minimum number length
-  max?: number;  // Maximum number length
+  min?: number;       // Minimum number length
+  max?: number;       // Maximum number length
   math?: Math;        // Optional math-related metadata
 }
 
@@ -43,4 +43,9 @@ export interface ConditionalOn {
 export interface Math {
   operation?: MathOperands;
   dependsOn?: string[];
+}
+
+export interface FormOption {
+  label: string;
+  value: string | number | boolean;
 }
