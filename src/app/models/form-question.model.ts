@@ -2,6 +2,19 @@ import { ValidatorFn } from "@angular/forms";
 import { ConditionalOperator } from "../enums/conditional-operator";
 import { MathOperands } from "../enums/math-operands";
 
+export interface FormPage {
+  title: string;
+  sections: FormSection[];
+}
+
+export interface FormSection {
+  title?: string;
+  questions: FormQuestion[];
+  conditionalOn?: ConditionalOn;
+  repeatFor?: { key: string };
+}
+
+
 export interface FormQuestion {
   key: string;
   label: string;
@@ -21,17 +34,6 @@ export interface FormQuestion {
   math?: Math;        // Optional math-related metadata
 }
 
-export interface FormSection {
-  title?: string;
-  questions: FormQuestion[];
-  conditionalOn?: ConditionalOn;
-  repeatFor?: { key: string };
-}
-
-export interface FormPage {
-  title: string;
-  sections: FormSection[];
-}
 
 export interface ConditionalOn {
   key?: string;
