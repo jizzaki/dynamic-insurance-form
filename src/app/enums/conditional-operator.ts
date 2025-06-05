@@ -9,5 +9,8 @@ export enum ConditionalOperator {
     IsTruthy = '!!',
     Any = 'any',
     All = 'all',
-    Not = 'not'
+    Not = 'not',
+    NotIn = 'notIn',
+    Exists = 'exists',
+    NotExists = 'notExists',
 }

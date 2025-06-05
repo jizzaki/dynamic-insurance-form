@@ -10,7 +10,10 @@ export interface FormSection {
   title?: string;
   questions: FormQuestion[];
   conditionalOn?: ConditionalOn;
-  repeatFor?: { key: string };
+  repeatFor?: { 
+    key: string,
+    defaultRepeatCount?: number 
+  };
 }
 
 

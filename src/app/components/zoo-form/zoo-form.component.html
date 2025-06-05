@@ -1,0 +1,43 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="container py-4">
+  <div *ngFor="let section of pages[currentPageIndex]?.sections">
+    <ng-container *ngIf="formEngine.isSectionVisible(section, form)">
+      <!-- Static Section -->
+      <div *ngIf="!section.repeatFor">
+        <div class="mb-4">
+          <h5 *ngIf="section.title">{{ section.title }}</h5>
+          <app-question-renderer2
+            *ngFor="let question of section.questions"
+            [question]="question"
+            [form]="form"
+            [ctrl]="form.get(question.key)">
+          </app-question-renderer2>
+        </div>
+      </div>
+
+      <!-- Repeating Section Support -->
+      <div *ngIf="section.repeatFor">
+        <h5 *ngIf="section.title">{{ section.title }}</h5>
+        <div *ngFor="let i of formEngine.getRepeatArray(form.get(section.repeatFor.key)?.value || 0); let idx = index">
+          <div class="mb-4 border p-3 rounded bg-light-subtle">
+            <app-question-renderer2
+              *ngFor="let question of section.questions"
+              [question]="question"
+              [form]="form"
+              [index]="idx"
+              [ctrl]="form.get(question.key + '_' + idx)">
+            </app-question-renderer2>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+
+  <ng-container *ngIf="currentPageIndex === pages.length - 1">
+    <app-form-summary [pages]="pages" [form]="form"></app-form-summary>
+  </ng-container>
+
+  <div class="mt-4 d-flex justify-content-between">
+    <button type="button" class="btn btn-outline-secondary" (click)="goToPreviousStep()" [disabled]="currentPageIndex === 0">Back</button>
+    <button type="button" class="btn btn-primary" (click)="goToNextStep()">Next</button>
+  </div>
+</form>
