@@ -28,7 +28,7 @@ export class FormSummaryComponent {
   }
 
   private getOptionLabel(question: FormQuestion, value: any): string {
-    const match = question.options?.find(opt => opt.value === value);
+    const match = question.options?.find(opt => opt.value == value);
     return match ? match.label : value;
   }
 

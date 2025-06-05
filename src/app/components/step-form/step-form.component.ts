@@ -178,11 +178,6 @@ export class StepFormComponent implements OnInit {
     // });
   }
 
-  private getAnswerValue(key: string, index?: number): string {
-    const actualKey = index !== undefined ? `${key}_${index}` : key;
-    return this.form.get(actualKey)?.value ?? '';
-  }
-
   private processPayment(): void {
     this.paymentLoading = true;
     this.paymentError = '';
