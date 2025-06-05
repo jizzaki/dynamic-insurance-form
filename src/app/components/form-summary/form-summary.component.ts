@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { FormPage, FormQuestion } from 'src/app/models/form-question.model';
-import { FormBuilderService } from 'src/app/services/form-builder.service';
+import { FormEngineService } from 'src/app/services/form-engine.service';
 
 @Component({
   selector: 'app-form-summary',
@@ -12,7 +12,7 @@ export class FormSummaryComponent {
   @Input() pages: FormPage[] = [];
   @Input() form!: FormGroup;
 
-  constructor(private formBuilderService: FormBuilderService) { }
+  constructor(private formEngineService: FormEngineService) { }
 
   getAnswer(question: FormQuestion, index?: number): string {
     const key = index !== undefined ? `${question.key}_${index}` : question.key;

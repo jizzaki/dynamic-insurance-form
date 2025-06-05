@@ -6,7 +6,7 @@
       <h5>{{ section.title }}</h5>
       <ul class="list-unstyled">
         <ng-container *ngIf="section.repeatFor?.key as repeatKey; else nonRepeating">
-          <ng-container *ngFor="let i of formBuilderService.getRepeatArray(form.get(repeatKey)?.value || 0)">
+          <ng-container *ngFor="let i of formEngineService.getRepeatArray(form.get(repeatKey)?.value || 0)">
             <li *ngFor="let question of section.questions">
               <strong>{{ question.label }} {{ i + 1 }}:</strong>
               <span>{{ getAnswer(question, i) }}</span>
@@ -16,7 +16,7 @@
 
         <ng-template #nonRepeating>
           <ng-container *ngFor="let question of section.questions">
-            <li *ngIf="formBuilderService.isVisible(question, form)">
+            <li *ngIf="formEngineService.isVisible(question, form)">
               <strong>{{ question.label }}:</strong>
               <span>{{ getAnswer(question) }}</span>
             </li>

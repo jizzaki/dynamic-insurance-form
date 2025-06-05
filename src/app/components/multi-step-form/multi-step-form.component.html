@@ -3,16 +3,16 @@
     <!-- FORM STEPS -->
     <ng-container *ngIf="currentPageIndex < pages.length - 1">
       <ng-container *ngFor="let section of page.sections">
-        <ng-container *ngIf="formBuilderService.isSectionVisible(section, form)">
+        <ng-container *ngIf="formEngineService.isSectionVisible(section, form)">
           <h3>{{ section.title }}</h3>
 
           <!-- REPEATED SECTION -->
           <ng-container *ngIf="section.repeatFor?.key as repeatKey; else nonRepeatingSection">
-            <ng-container *ngFor="let i of formBuilderService.getRepeatArray(form.get(repeatKey)?.value || 0)">
+            <ng-container *ngFor="let i of formEngineService.getRepeatArray(form.get(repeatKey)?.value || 0)">
               <div class="border rounded p-3 mb-3">
                 <h4>{{ section.title }} {{ i + 1 }}</h4>
                 <ng-container *ngFor="let question of section.questions">
-                  <div *ngIf="formBuilderService.isVisible(question, form)">
+                  <div *ngIf="formEngineService.isVisible(question, form)">
                     <ng-container *ngIf="form.get(question.key + '_' + i) as ctrl">
                       <app-question-renderer [question]="question" [ctrl]="ctrl" [form]="form" [index]="i">
                       </app-question-renderer>
@@ -26,7 +26,7 @@
           <!-- NON-REPEATING SECTION -->
           <ng-template #nonRepeatingSection>
             <ng-container *ngFor="let question of section.questions">
-              <div *ngIf="formBuilderService.isVisible(question, form)">
+              <div *ngIf="formEngineService.isVisible(question, form)">
                 <ng-container *ngIf="form.get(question.key) as ctrl">
                   <app-question-renderer [question]="question" [ctrl]="ctrl" [form]="form">
                   </app-question-renderer>

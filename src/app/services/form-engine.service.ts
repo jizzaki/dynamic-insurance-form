@@ -5,7 +5,7 @@ import { ConditionalOperator } from '../enums/conditional-operator';
 import { MathOperands } from '../enums/math-operands';
 
 @Injectable({ providedIn: 'root' })
-export class FormBuilderService {
+export class FormEngineService {
   constructor(private fb: FormBuilder) { }
 
 

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ZOO_ANIMAL_INSURANCE_FORM } from 'src/app/data/zoo-animal-form-pages';
-import { FormBuilderService } from 'src/app/services/form-builder.service';
+import { FormEngineService } from 'src/app/services/form-engine.service';
 import { FormQuestion } from 'src/app/models/form-question.model';
 
 @Component({
@@ -22,12 +22,12 @@ export class MultiStepFormComponent implements OnInit {
   paymentError = '';
   last4Digits = '';
 
-  constructor(private formBuilderService: FormBuilderService
+  constructor(private formEngineService: FormEngineService
     , private http: HttpClient) { }
 
   ngOnInit(): void {
     const allSections = this.pages.flatMap(p => p.sections);
-    this.form = this.formBuilderService.buildForm(allSections, this.form, this.pages);
+    this.form = this.formEngineService.buildForm(allSections, this.form, this.pages);
   }
 
   goToNextStep(): void {
@@ -37,7 +37,7 @@ export class MultiStepFormComponent implements OnInit {
       questions.flatMap(q => [q, ...(q.children ? flattenQuestions(q.children) : [])]);
 
     const visibleSections = currentPage.sections.filter(section =>
-      this.formBuilderService.isSectionVisible(section, this.form)
+      this.formEngineService.isSectionVisible(section, this.form)
     );
 
     // Collect real FormQuestions with repeat metadata
@@ -64,7 +64,7 @@ export class MultiStepFormComponent implements OnInit {
     // Visibility + validation
     allQuestions.forEach(({ question, key }) => {
       const ctrl = this.form.get(key);
-      const isVisible = this.formBuilderService.isVisible(question, this.form);
+      const isVisible = this.formEngineService.isVisible(question, this.form);
 
       if (ctrl) {
         if (!isVisible) {
