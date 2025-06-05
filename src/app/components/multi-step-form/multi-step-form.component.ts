@@ -1,16 +1,16 @@
 import { Component, OnInit } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormGroup } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ZOO_ANIMAL_INSURANCE_FORM } from 'src/app/data/zoo-animal-form-pages';
 import { FormBuilderService } from 'src/app/services/form-builder.service';
 import { FormQuestion } from 'src/app/models/form-question.model';
 
 @Component({
-  selector: 'app-step-form',
-  templateUrl: './step-form.component.html',
+  selector: 'app-multi-step-form',
+  templateUrl: './multi-step-form.component.html',
   standalone: false
 })
-export class StepFormComponent implements OnInit {
+export class MultiStepFormComponent implements OnInit {
   form: FormGroup;
   pages = ZOO_ANIMAL_INSURANCE_FORM;
   currentPageIndex = 0;

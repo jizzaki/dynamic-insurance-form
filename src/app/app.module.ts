@@ -17,7 +17,7 @@ import { CurrencyFormatterDirective } from './directives/currency/currency-forma
 import { DateFormatterDirective } from './directives/date/date-formatter.directive';
 import { PhoneNumberFormatterDirective } from './directives/phoneNumber/phone-number-formatter.directive';
 import { ZipCodeFormatterDirective } from './directives/zipCode/zip-code-formatter.directive';
-import { StepFormComponent } from './components/step-form/step-form.component';
+import { MultiStepFormComponent } from './components/multi-step-form/multi-step-form.component';
 import { DynamicInputComponent } from './components/dynamic-input/dynamic-input.component';
 import { provideNgxMask } from 'ngx-mask';
 import { QuestionRendererComponent } from './components/question-renderer/question-renderer.component';
@@ -28,7 +28,7 @@ providers: [provideNgxMask()]
 @NgModule({
     declarations: [
         AppComponent,
-        StepFormComponent,
+        MultiStepFormComponent,
         QuestionRendererComponent,
         FormSummaryComponent,
         DynamicInputComponent,
