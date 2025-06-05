@@ -2,7 +2,7 @@
   <div class="step" *ngIf="pages[currentPageIndex] as page">
     <h2 class="step-title">{{ page.title }}</h2>
 
-    <!-- FORM STEPS (not last page) -->
+    <!-- FORM STEPS -->
     <ng-container *ngIf="currentPageIndex < pages.length - 1">
       <ng-container *ngFor="let section of page.sections">
         <ng-container *ngIf="formBuilderService.isSectionVisible(section, form)">
