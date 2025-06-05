@@ -21,6 +21,7 @@ import { StepFormComponent } from './components/step-form/step-form.component';
 import { DynamicInputComponent } from './components/dynamic-input/dynamic-input.component';
 import { provideNgxMask } from 'ngx-mask';
 import { QuestionRendererComponent } from './components/question-renderer/question-renderer.component';
+import { FormSummaryComponent } from './components/form-summary/form-summary.component';
 
 providers: [provideNgxMask()]
 
@@ -29,6 +30,7 @@ providers: [provideNgxMask()]
         AppComponent,
         StepFormComponent,
         QuestionRendererComponent,
+        FormSummaryComponent,
         DynamicInputComponent,
         ZipCodeFormatterDirective,
         PhoneNumberFormatterDirective,

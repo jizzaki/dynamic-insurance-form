@@ -1,0 +1,28 @@
+<!-- form-summary.component.html -->
+<div *ngFor="let page of pages; let pageIndex = index">
+  <ng-container *ngIf="pageIndex < pages.length - 1">
+    <h4>{{ page.title }}</h4>
+    <ng-container *ngFor="let section of page.sections">
+      <h5>{{ section.title }}</h5>
+      <ul class="list-unstyled">
+        <ng-container *ngIf="section.repeatFor?.key as repeatKey; else nonRepeating">
+          <ng-container *ngFor="let i of formBuilderService.getRepeatArray(form.get(repeatKey)?.value || 0)">
+            <li *ngFor="let question of section.questions">
+              <strong>{{ question.label }} {{ i + 1 }}:</strong>
+              <span>{{ getAnswer(question.key + '_' + i) }}</span>
+            </li>
+          </ng-container>
+        </ng-container>
+
+        <ng-template #nonRepeating>
+          <ng-container *ngFor="let question of section.questions">
+            <li *ngIf="formBuilderService.isVisible(question, form)">
+              <strong>{{ question.label }}:</strong>
+              <span>{{ getAnswer(question.key) }}</span>
+            </li>
+          </ng-container>
+        </ng-template>
+      </ul>
+    </ng-container>
+  </ng-container>
+</div>

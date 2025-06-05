@@ -50,38 +50,9 @@
       </ng-container>
     </ng-container>
 
-    <!-- CONFIRMATION SUMMARY (last page) -->
+    <!-- CONFIRMATION SUMMARY (last page) // This can be moved to and used as a router link -->
     <ng-container *ngIf="currentPageIndex === pages.length - 1">
-      <h3>Insurance Summary</h3>
-      <ng-container *ngFor="let page of pages; let pageIndex = index">
-        <ng-container *ngIf="pageIndex < pages.length - 1">
-          <h4>{{ page.title }}</h4>
-          <ng-container *ngFor="let section of page.sections">
-            <ng-container *ngIf="formBuilderService.isSectionVisible(section, form)">
-              <h5>{{ section.title }}</h5>
-              <ul class="list-unstyled">
-                <ng-container *ngIf="section.repeatFor?.key as repeatKey; else nonRepeatingSummary">
-                  <ng-container *ngFor="let i of formBuilderService.getRepeatArray(form.get(repeatKey)?.value || 0)">
-                    <li *ngFor="let question of section.questions">
-                      <strong>{{ question.label }} {{ i + 1 }}:</strong>
-                      <span>{{ getAnswerValue(question.key + '_' + i) }}</span>
-                    </li>
-                  </ng-container>
-                </ng-container>
-
-                <ng-template #nonRepeatingSummary>
-                  <ng-container *ngFor="let question of section.questions">
-                    <li *ngIf="formBuilderService.isVisible(question, form)">
-                      <strong>{{ question.label }}:</strong>
-                      <span>{{ getAnswerValue(question.key) }}</span>
-                    </li>
-                  </ng-container>
-                </ng-template>
-              </ul>
-            </ng-container>
-          </ng-container>
-        </ng-container>
-      </ng-container>
+      <app-form-summary [pages]="pages" [form]="form"></app-form-summary>
     </ng-container>
 
     <!-- NAV BUTTONS -->
