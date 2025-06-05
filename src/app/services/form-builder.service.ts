@@ -270,6 +270,19 @@ export class FormBuilderService {
     }
   }
 
+  toggleCheckboxValue(form: FormGroup, key: string, value: string): void {
+    const control = form.get(key);
+    if (!control) return;
+
+    const current: string[] = control.value || [];
+    if (current.includes(value)) {
+      control.setValue(current.filter(v => v !== value));
+    } else {
+      control.setValue([...current, value]);
+    }
+  }
+
+
   private hasAllKeysFilled(cond: ConditionalOn, form: FormGroup): boolean {
     if (cond.key) {
       const val = form.get(cond.key)?.value;

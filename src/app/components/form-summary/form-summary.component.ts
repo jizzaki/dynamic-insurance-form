@@ -32,6 +32,4 @@ export class FormSummaryComponent {
     return match ? match.label : value;
   }
 
-
-
 }

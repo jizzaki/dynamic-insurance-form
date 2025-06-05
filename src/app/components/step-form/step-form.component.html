@@ -20,8 +20,7 @@
                         [question]="question"
                         [ctrl]="ctrl"
                         [form]="form"
-                        [index]="i"
-                        (checkboxToggle)="onCheckboxToggle($event.key, $event.value)">
+                        [index]="i">
                       </app-question-renderer>
                     </ng-container>
                   </div>
@@ -38,8 +37,7 @@
                   <app-question-renderer
                     [question]="question"
                     [ctrl]="ctrl"
-                    [form]="form"
-                    (checkboxToggle)="onCheckboxToggle($event.key, $event.value)">
+                    [form]="form">
                   </app-question-renderer>
                 </ng-container>
               </div>

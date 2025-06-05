@@ -2,6 +2,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { FormGroup, AbstractControl, FormControl } from '@angular/forms';
 import { FormQuestion } from 'src/app/models/form-question.model';
+import { FormBuilderService } from 'src/app/services/form-builder.service';
 
 @Component({
   selector: 'app-question-renderer',
@@ -15,8 +16,11 @@ export class QuestionRendererComponent {
   @Input() index?: number;
   @Output() checkboxToggle = new EventEmitter<{ key: string; value: any }>();
 
+  constructor(public formBuilderService: FormBuilderService) {}
+
   onCheckboxToggle(key: string, value: any): void {
     this.checkboxToggle.emit({ key, value });
+    this.formBuilderService.toggleCheckboxValue(this.form, key, value);
   }
 
   onClampValue(ctrl: FormControl, min?: number, max?: number) {
