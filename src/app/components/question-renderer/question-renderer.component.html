@@ -1,0 +1,71 @@
+<!-- question-renderer.component.html -->
+<div class="mb-3" [ngSwitch]="question.type">
+
+  <!-- Text Input -->
+  <div *ngSwitchCase="'text'">
+    <label class="form-label">{{ question.label }}</label>
+    <input-with-directive [formControl]="ctrl" [directive]="question.directive" [inputType]="question.inputType"
+      [className]="'form-control'" [mask]="question.mask" [disabled]="ctrl.disabled"
+      [ngClass]="{ 'is-invalid': isInvalid }" />
+    <div class="invalid-feedback" *ngIf="isInvalid">
+      <ng-container *ngIf="ctrl.errors?.['required']">This field is required.</ng-container>
+      <ng-container *ngIf="ctrl.errors?.['mathValidation']">{{ ctrl.errors['mathValidation'] }}</ng-container>
+    </div>
+  </div>
+
+  <!-- Textarea -->
+  <div *ngSwitchCase="'textarea'">
+    <label class="form-label">{{ question.label }}</label>
+    <textarea class="form-control" [formControl]="ctrl" [disabled]="ctrl.disabled"
+      [ngClass]="{ 'is-invalid': isInvalid }"></textarea>
+    <div class="invalid-feedback" *ngIf="isInvalid">This field is required.</div>
+  </div>
+
+  <!-- Select Dropdown -->
+  <div *ngSwitchCase="'select'">
+    <label class="form-label">{{ question.label }}</label>
+    <select class="form-select" [formControl]="ctrl" [disabled]="ctrl.disabled"
+      [ngClass]="{ 'is-invalid': isInvalid }">
+      <option *ngFor="let opt of question.options" [value]="opt.value">{{ opt.label }}</option>
+    </select>
+    <div class="invalid-feedback" *ngIf="isInvalid">Please select an option.</div>
+  </div>
+
+  <!-- Radio Buttons -->
+  <div *ngSwitchCase="'radio'">
+    <label class="form-label d-block">{{ question.label }}</label>
+    <div *ngFor="let opt of question.options" class="form-check">
+      <input type="radio" class="form-check-input" [value]="opt.value" [formControl]="ctrl"
+        [disabled]="ctrl.disabled" [attr.name]="keyWithIndex" [id]="keyWithIndex + '_' + opt.value" />
+      <label class="form-check-label" [for]="keyWithIndex + '_' + opt.value">{{ opt.label }}</label>
+    </div>
+    <div class="text-danger small" *ngIf="isInvalid">Please select an option.</div>
+  </div>
+
+  <!-- Checkbox Group -->
+  <div *ngSwitchCase="'checkbox-group'">
+    <label class="form-label d-block">{{ question.label }}</label>
+    <div *ngFor="let opt of question.options" class="form-check">
+      <input type="checkbox" class="form-check-input" [checked]="ctrl.value?.includes(opt.value)"
+        [disabled]="ctrl.disabled" (change)="onCheckboxToggle(question.key, opt.value)" />
+      <label class="form-check-label">{{ opt.label }}</label>
+    </div>
+    <div class="text-danger small mt-1" *ngIf="isInvalid">Please select at least one option.</div>
+  </div>
+
+  <!-- Number Input -->
+  <div *ngSwitchCase="'number'">
+    <label class="form-label">{{ question.label }}</label>
+    <input type="number" class="form-control" [formControl]="ctrl"
+      [ngClass]="{ 'is-invalid': isInvalid, 'bg-light': question.math }" [disabled]="ctrl.disabled"
+      [attr.min]="question.min" [attr.max]="question.max" [readonly]="question.math != null"
+      [attr.step]="question.step || 1" />
+    <div class="invalid-feedback" *ngIf="isInvalid">
+      <ng-container *ngIf="ctrl.errors?.['required']">This field is required.</ng-container>
+      <ng-container *ngIf="ctrl.errors?.['mathValidation']">{{ ctrl.errors['mathValidation'] }}</ng-container>
+      <ng-container *ngIf="ctrl.errors?.['min']">Minimum allowed is {{ question.min }}.</ng-container>
+      <ng-container *ngIf="ctrl.errors?.['max']">Maximum allowed is {{ question.max }}.</ng-container>
+    </div>
+  </div>
+
+</div>

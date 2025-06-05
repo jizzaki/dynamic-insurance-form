@@ -1,4 +1,3 @@
-import { ValidatorFn } from "@angular/forms";
 import { ConditionalOperator } from "../enums/conditional-operator";
 import { MathOperands } from "../enums/math-operands";
 

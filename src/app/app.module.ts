@@ -20,6 +20,7 @@ import { ZipCodeFormatterDirective } from './directives/zipCode/zip-code-formatt
 import { StepFormComponent } from './components/step-form/step-form.component';
 import { DynamicInputComponent } from './components/dynamic-input/dynamic-input.component';
 import { provideNgxMask } from 'ngx-mask';
+import { QuestionRendererComponent } from './components/question-renderer/question-renderer.component';
 
 providers: [provideNgxMask()]
 
@@ -27,6 +28,7 @@ providers: [provideNgxMask()]
     declarations: [
         AppComponent,
         StepFormComponent,
+        QuestionRendererComponent,
         DynamicInputComponent,
         ZipCodeFormatterDirective,
         PhoneNumberFormatterDirective,
