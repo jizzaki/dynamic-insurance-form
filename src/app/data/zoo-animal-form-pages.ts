@@ -62,6 +62,20 @@ export const ZOO_ANIMAL_INSURANCE_FORM: FormPage[] = [
         questions: [
           { key: 'animalName', label: 'Name of Tiger', type: 'text', validators: [Validators.required] },
           { key: 'animalAge', label: 'Age of Tiger', type: 'text', validators: [Validators.required] },
+          { key: 'costOfAnimal', label: 'How much did tiger cost?', type: 'number' },
+          { key: 'costOfAnimalExpenses', label: 'How much were the tigers total expenses?', type: 'number' },
+          {
+            key: 'tigerTotalExpenses',
+            label: 'Net Total',
+            type: 'number',
+            validators: [ 
+              MathValidator.validate(ConditionalOperator.GreaterThan, 0)
+            ],
+            math: {
+              operation: MathOperands.Add,
+              dependsOn: ['costOfAnimal', 'costOfAnimalExpenses'],
+            }
+          }
         ]
       },
       {

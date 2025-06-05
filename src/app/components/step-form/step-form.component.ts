@@ -164,6 +164,7 @@ export class StepFormComponent implements OnInit {
   }
 
   onSubmit(): void {
+    console.log(this.form.valid)
     if (this.form.valid) {
       console.log('Submitted', this.form.value);
     }

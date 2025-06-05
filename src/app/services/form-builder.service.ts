@@ -322,13 +322,27 @@ export class FormBuilderService {
       section.questions.forEach(q => {
         const key = `${q.key}_${i}`;
         const initialValue = q.type === 'checkbox-group' ? [] : null;
-        form.addControl(
-          key,
-          new FormControl(initialValue, q.validators || [])
-        );
+        form.addControl(key, new FormControl(initialValue, q.validators || []));
+
+        // 👇 Add math logic here
+        if (q.math?.dependsOn?.length) {
+          const scopedQuestion: FormQuestion = {
+            ...q,
+            key: key,
+            math: {
+              ...q.math,
+              dependsOn: q.math.dependsOn.map(dep => `${dep}_${i}`),
+            }
+          };
+
+          this.setupMathWatchers(form, scopedQuestion);
+        }
+
+        
       });
     }
   }
+
 
   toggleCheckboxValue(form: FormGroup, key: string, value: string): void {
     const control = form.get(key);

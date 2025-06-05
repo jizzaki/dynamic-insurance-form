@@ -22,8 +22,6 @@ import { DynamicInputComponent } from './components/dynamic-input/dynamic-input.
 import { provideNgxMask } from 'ngx-mask';
 import { QuestionRendererComponent } from './components/question-renderer/question-renderer.component';
 import { FormSummaryComponent } from './components/form-summary/form-summary.component';
-import { ZooFormComponent } from './components/zoo-form/zoo-form.component';
-import { QuestionRenderer2Component } from './components/question-renderer2/question-renderer2.component';
 
 providers: [provideNgxMask()]
 
@@ -31,9 +29,7 @@ providers: [provideNgxMask()]
     declarations: [
         AppComponent,
         StepFormComponent,
-        ZooFormComponent,
         QuestionRendererComponent,
-        QuestionRenderer2Component,
         FormSummaryComponent,
         DynamicInputComponent,
         ZipCodeFormatterDirective,

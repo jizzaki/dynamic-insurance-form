@@ -1,7 +1,5 @@
-<div class="stepper" *ngIf="form && pages?.length">
-  <div class="step" *ngIf="pages[currentPageIndex] as page">
-    <h2 class="step-title">{{ page.title }}</h2>
-
+<form [formGroup]="form" class="container py-4" *ngIf="form && pages?.length">
+  <div *ngIf="pages[currentPageIndex] as page">
     <!-- FORM STEPS -->
     <ng-container *ngIf="currentPageIndex < pages.length - 1">
       <ng-container *ngFor="let section of page.sections">
@@ -16,11 +14,7 @@
                 <ng-container *ngFor="let question of section.questions">
                   <div *ngIf="formBuilderService.isVisible(question, form)">
                     <ng-container *ngIf="form.get(question.key + '_' + i) as ctrl">
-                      <app-question-renderer
-                        [question]="question"
-                        [ctrl]="ctrl"
-                        [form]="form"
-                        [index]="i">
+                      <app-question-renderer [question]="question" [ctrl]="ctrl" [form]="form" [index]="i">
                       </app-question-renderer>
                     </ng-container>
                   </div>
@@ -34,10 +28,7 @@
             <ng-container *ngFor="let question of section.questions">
               <div *ngIf="formBuilderService.isVisible(question, form)">
                 <ng-container *ngIf="form.get(question.key) as ctrl">
-                  <app-question-renderer
-                    [question]="question"
-                    [ctrl]="ctrl"
-                    [form]="form">
+                  <app-question-renderer [question]="question" [ctrl]="ctrl" [form]="form">
                   </app-question-renderer>
                 </ng-container>
               </div>
@@ -54,10 +45,11 @@
     </ng-container>
 
     <!-- NAV BUTTONS -->
-    <div class="step-actions d-flex gap-2 mt-4">
-      <button class="btn btn-secondary" (click)="goToPreviousStep()" *ngIf="currentPageIndex > 0">Back</button>
-      <button class="btn btn-success" (click)="goToNextStep()" *ngIf="currentPageIndex < pages.length - 1">Next</button>
+    <div class="mt-4 d-flex justify-content-between">
+      <button type="button" class="btn btn-outline-secondary" (click)="goToPreviousStep()" [disabled]="currentPageIndex === 0" *ngIf="currentPageIndex > 0">Back</button>
+      <button type="button" class="btn btn-primary" (click)="goToNextStep()" *ngIf="currentPageIndex < pages.length - 1">Next</button>
       <button class="btn btn-success" (click)="onSubmit()" *ngIf="currentPageIndex === pages.length - 1">Submit</button>
     </div>
   </div>
-</div>
+
+</form>
