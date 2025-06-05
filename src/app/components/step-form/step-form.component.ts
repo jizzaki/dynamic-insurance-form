@@ -27,52 +27,7 @@ export class StepFormComponent implements OnInit {
 
   ngOnInit(): void {
     const allSections = this.pages.flatMap(p => p.sections);
-    this.form = this.formBuilderService.buildForm(allSections);
-
-    // Set up dynamic repeat section watchers
-    this.pages.forEach(page => {
-      page.sections
-        .filter(section => section.repeatFor?.key && section.questions)
-        .forEach(section => {
-          const repeatKey = section.repeatFor.key;
-          const repeatControl = this.form.get(repeatKey);
-
-          if (repeatControl) {
-            repeatControl.valueChanges.subscribe(count => {
-              this.handleRepeatSection(section, count);
-            });
-
-            // Initialize on preloaded value
-            if (repeatControl.value) {
-              this.handleRepeatSection(section, repeatControl.value);
-            }
-          }
-        });
-    });
-
-  }
-
-  handleRepeatSection(section: any, count: number): void {
-    if (!Array.isArray(section.questions)) return;
-
-    // Remove old controls
-    section.questions.forEach(q => {
-      Object.keys(this.form.controls)
-        .filter(k => k.startsWith(`${q.key}_`))
-        .forEach(k => this.form.removeControl(k));
-    });
-
-    // Add new repeated controls
-    for (let i = 0; i < count; i++) {
-      section.questions.forEach(q => {
-        const key = `${q.key}_${i}`;
-        const initialValue = q.type === 'checkbox-group' ? [] : null;
-        this.form.addControl(
-          key,
-          new FormControl(initialValue, q.validators || [])
-        );
-      });
-    }
+    this.form = this.formBuilderService.buildForm(allSections, this.form, this.pages);
   }
 
   goToNextStep(): void {

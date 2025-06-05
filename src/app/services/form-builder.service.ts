@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { ConditionalOn, FormQuestion, FormSection, Math } from '../models/form-question.model';
+import { ConditionalOn, FormPage, FormQuestion, FormSection, Math } from '../models/form-question.model';
 import { ConditionalOperator } from '../enums/conditional-operator';
 import { MathOperands } from '../enums/math-operands';
 
@@ -8,86 +8,123 @@ import { MathOperands } from '../enums/math-operands';
 export class FormBuilderService {
   constructor(private fb: FormBuilder) { }
 
-  buildForm(sections: FormSection[], form?: FormGroup): FormGroup {
+
+  buildForm(sections: FormSection[], form?: FormGroup, pages?: FormPage[]): FormGroup {
     const group: Record<string, FormControl> = {};
 
+    // Step 1: Initialize all controls
     for (const section of sections) {
-      if (!Array.isArray(section.questions)) {
-        console.warn('Invalid section.questions:', section);
-        continue;
-      }
+      if (!Array.isArray(section.questions)) continue;
 
       if (section.repeatFor) {
-        const repeatCount = form?.get(section.repeatFor.key)?.value || 0;
-
-        for (let i = 0; i < repeatCount; i++) {
-          for (const question of section.questions) {
-            const key = `${question.key}_${i}`;
-            const initialValue = question.type === 'checkbox-group' ? [] : null;
-
-            group[key] = new FormControl(
-              { value: initialValue, disabled: !!question.conditionalOn || !!question.disabled },
-              question.validators || []
-            );
-
-            if (question.children) {
-              const childGroup = this.buildForm([{ questions: question.children }]);
-              Object.keys(childGroup.controls).forEach(childKey => {
-                group[`${childKey}_${i}`] = childGroup.get(childKey) as FormControl;
-              });
-            }
-          }
-        }
+        this.initializeRepeatableSection(group, section, form);
       } else {
-        for (const question of section.questions) {
-          const initialValue = question.type === 'checkbox-group' ? [] : null;
-
-          const validators = question.validators ? [...question.validators] : [];
-          group[question.key] = new FormControl(
-            { value: initialValue, disabled: !!question.conditionalOn || !!question.disabled },
-            validators
-          );
-
-          if (question.math?.dependsOn?.length) {
-            question.math.dependsOn.forEach(depKey => {
-              if (!group[depKey]) {
-                group[depKey] = new FormControl(null);
-              }
-            });
-          }
-
-          if (question.children) {
-            const childGroup = this.buildForm([{ questions: question.children }]);
-            Object.assign(group, childGroup.controls);
-          }
-        }
+        this.initializeFlatSection(group, section);
       }
     }
 
+    // Step 2: Create form group
     const formGroup = this.fb.group(group);
 
+    // Step 3: Setup math field watchers
     for (const section of sections) {
       if (section.repeatFor) continue;
 
       for (const question of section.questions) {
         if (question.math?.dependsOn?.length) {
-          const updateComputedValue = () => {
-            const newValue = this.computeMathValue(formGroup, question.math!);
-            formGroup.get(question.key)?.setValue(newValue, { emitEvent: true });
-            formGroup.get(question.key)?.updateValueAndValidity();
-          };
-
-          question.math.dependsOn.forEach(depKey => {
-            formGroup.get(depKey)?.valueChanges.subscribe(updateComputedValue);
-          });
-
-          updateComputedValue();
+          this.setupMathWatchers(formGroup, question);
         }
       }
     }
 
+    // Step 4: Set up dynamic repeat section watchers
+    pages.forEach(page => {
+      page.sections
+        .filter(section => section.repeatFor?.key && section.questions)
+        .forEach(section => {
+          const repeatKey = section.repeatFor.key;
+          const repeatControl = formGroup.get(repeatKey);
+
+          if (repeatControl) {
+            repeatControl.valueChanges.subscribe(count => {
+              this.handleRepeatSection(formGroup, section, count);
+            });
+
+            // Initialize on preloaded value
+            if (repeatControl.value) {
+              this.handleRepeatSection(formGroup, section, repeatControl.value);
+            }
+          }
+        });
+    });
+
     return formGroup;
   }
+
+  private initializeRepeatableSection(group: Record<string, FormControl>, section: FormSection, form?: FormGroup): void {
+    const repeatCount = form?.get(section.repeatFor!.key)?.value || 0;
+
+    for (let i = 0; i < repeatCount; i++) {
+      for (const question of section.questions) {
+        const key = `${question.key}_${i}`;
+        group[key] = this.initializeQuestionControl(question);
+
+        // Handle nested children
+        if (question.children) {
+          const childGroup = this.buildForm([{ questions: question.children }]);
+          Object.keys(childGroup.controls).forEach(childKey => {
+            group[`${childKey}_${i}`] = childGroup.get(childKey) as FormControl;
+          });
+        }
+      }
+    }
+  }
+
+  private initializeFlatSection(group: Record<string, FormControl>, section: FormSection): void {
+    for (const question of section.questions) {
+      group[question.key] = this.initializeQuestionControl(question);
+
+      // Ensure math dependencies are initialized
+      if (question.math?.dependsOn?.length) {
+        question.math.dependsOn.forEach(depKey => {
+          if (!group[depKey]) {
+            group[depKey] = new FormControl(null);
+          }
+        });
+      }
+
+      // Handle nested children
+      if (question.children) {
+        const childGroup = this.buildForm([{ questions: question.children }]);
+        Object.assign(group, childGroup.controls);
+      }
+    }
+  }
+
+  private initializeQuestionControl(question: FormQuestion): FormControl {
+    const initialValue = question.type === 'checkbox-group' ? [] : null;
+    const validators = question.validators ? [...question.validators] : [];
+
+    return new FormControl(
+      { value: initialValue, disabled: !!question.conditionalOn || !!question.disabled },
+      validators
+    );
+  }
+
+  private setupMathWatchers(form: FormGroup, question: FormQuestion): void {
+    const updateComputedValue = () => {
+      const newValue = this.computeMathValue(form, question.math!);
+      form.get(question.key)?.setValue(newValue, { emitEvent: true });
+      form.get(question.key)?.updateValueAndValidity();
+    };
+
+    question.math!.dependsOn.forEach(depKey => {
+      form.get(depKey)?.valueChanges.subscribe(updateComputedValue);
+    });
+
+    updateComputedValue(); // Initialize
+  }
+
 
   isVisible(item: FormQuestion, form: FormGroup): boolean {
     const isVisible = item.conditionalOn ? this.evaluateConditionalOn(item.conditionalOn, form) : true;
@@ -270,6 +307,29 @@ export class FormBuilderService {
     }
   }
 
+  handleRepeatSection(form: FormGroup, section: any, count: number): void {
+    if (!Array.isArray(section.questions)) return;
+
+    // Remove old controls
+    section.questions.forEach(q => {
+      Object.keys(form.controls)
+        .filter(k => k.startsWith(`${q.key}_`))
+        .forEach(k => form.removeControl(k));
+    });
+
+    // Add new repeated controls
+    for (let i = 0; i < count; i++) {
+      section.questions.forEach(q => {
+        const key = `${q.key}_${i}`;
+        const initialValue = q.type === 'checkbox-group' ? [] : null;
+        form.addControl(
+          key,
+          new FormControl(initialValue, q.validators || [])
+        );
+      });
+    }
+  }
+
   toggleCheckboxValue(form: FormGroup, key: string, value: string): void {
     const control = form.get(key);
     if (!control) return;
@@ -281,7 +341,6 @@ export class FormBuilderService {
       control.setValue([...current, value]);
     }
   }
-
 
   private hasAllKeysFilled(cond: ConditionalOn, form: FormGroup): boolean {
     if (cond.key) {
