@@ -67,9 +67,13 @@
   <div *ngSwitchCase="'number'">
     <label class="form-label">{{ question.label }}</label>
     <input type="number" class="form-control" [formControl]="ctrl"
-      [ngClass]="{ 'is-invalid': isInvalid, 'bg-light': question.math }" [disabled]="ctrl.disabled"
-      [attr.min]="question.min" [attr.max]="question.max" [readonly]="question.math != null"
-      [attr.step]="question.step || 1" />
+      [ngClass]="{ 'is-invalid': isInvalid, 'bg-light': question.math }" 
+      [disabled]="ctrl.disabled"
+      [attr.min]="question.min" 
+      [attr.max]="question.max" 
+      [readonly]="question.math != null"
+      [attr.step]="question.step || 1" 
+      (blur)="onClampValue(ctrl, question.min, question.max)" />
     <div class="invalid-feedback" *ngIf="isInvalid">
       <ng-container *ngIf="ctrl.errors?.['required']">This field is required.</ng-container>
       <ng-container *ngIf="ctrl.errors?.['mathValidation']">{{ ctrl.errors['mathValidation'] }}</ng-container>
@@ -79,26 +83,3 @@
   </div>
 
 </div>
-
-<!-- 
-
-                    <div *ngSwitchCase="'radio'">
-                      <label class="form-label d-block">{{ question.label }}</label>
-                      
-                      <ng-container *ngIf="form.get(question.key) as ctrl">
-                        <div class="form-check" *ngFor="let opt of question.options">
-                          <input
-                            type="radio"
-                            class="form-check-input"
-                            [value]="opt.value"
-                            [formControl]="ctrl"
-                            [name]="question.key + '_radio_group'" 
-                            [id]="question.key + '_' + opt.value"
-                          />
-                          <label class="form-check-label" [for]="question.key + '_' + opt.value">{{ opt.label }}</label>
-                        </div>
-                      </ng-container>
-                      <div class="text-danger small" *ngIf="ctrl.invalid && (ctrl.touched || ctrl.dirty)">
-                        Please select an option.
-                      </div>
-                    </div> -->

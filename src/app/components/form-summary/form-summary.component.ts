@@ -14,12 +14,24 @@ export class FormSummaryComponent {
 
   constructor(private formBuilderService: FormBuilderService) { }
 
-  getAnswer(key: string): string {
+  getAnswer(question: FormQuestion, index?: number): string {
+    const key = index !== undefined ? `${question.key}_${index}` : question.key;
     const value = this.form.get(key)?.value;
+
     if (Array.isArray(value)) {
-      return value.join(', ');
+      return value
+        .map(val => this.getOptionLabel(question, val))
+        .join(', ');
     }
-    return value !== undefined && value !== null && value !== '' ? value : '-';
+
+    return this.getOptionLabel(question, value) || '-';
   }
+
+  private getOptionLabel(question: FormQuestion, value: any): string {
+    const match = question.options?.find(opt => opt.value === value);
+    return match ? match.label : value;
+  }
+
+
 
 }

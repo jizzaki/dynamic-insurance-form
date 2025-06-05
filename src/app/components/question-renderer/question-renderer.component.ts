@@ -1,6 +1,6 @@
 // question-renderer.component.ts
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { FormGroup, AbstractControl } from '@angular/forms';
+import { FormGroup, AbstractControl, FormControl } from '@angular/forms';
 import { FormQuestion } from 'src/app/models/form-question.model';
 
 @Component({
@@ -17,6 +17,14 @@ export class QuestionRendererComponent {
 
   onCheckboxToggle(key: string, value: any): void {
     this.checkboxToggle.emit({ key, value });
+  }
+
+  onClampValue(ctrl: FormControl, min?: number, max?: number) {
+    const value = Number(ctrl.value);
+    if (isNaN(value)) return;
+
+    if (min !== undefined && value < min) ctrl.setValue(min);
+    if (max !== undefined && value > max) ctrl.setValue(max);
   }
 
   get keyWithIndex(): string {

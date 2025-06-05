@@ -150,7 +150,7 @@ export class StepFormComponent implements OnInit {
     }
   }
 
-  calculatePremium(): void {
+  private calculatePremium(): void {
     this.premiumLoading = true;
     this.premiumError = '';
     const payload = {
@@ -178,12 +178,12 @@ export class StepFormComponent implements OnInit {
     // });
   }
 
-  getAnswerValue(key: string, index?: number): string {
+  private getAnswerValue(key: string, index?: number): string {
     const actualKey = index !== undefined ? `${key}_${index}` : key;
     return this.form.get(actualKey)?.value ?? '';
   }
 
-  processPayment(): void {
+  private processPayment(): void {
     this.paymentLoading = true;
     this.paymentError = '';
     const paymentPayload = {
@@ -231,12 +231,6 @@ export class StepFormComponent implements OnInit {
     }
   }
 
-  onClampValue(ctrl: FormControl, min?: number, max?: number) {
-    const value = Number(ctrl.value);
-    if (isNaN(value)) return;
 
-    if (min !== undefined && value < min) ctrl.setValue(min);
-    if (max !== undefined && value > max) ctrl.setValue(max);
-  }
 
 }
