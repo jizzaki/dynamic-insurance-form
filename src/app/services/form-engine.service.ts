@@ -280,37 +280,6 @@ export class FormEngineService {
     return isVisible;
   }
 
-  isVisibleOld(item: FormQuestion, form: FormGroup): boolean {
-    const isVisible = item.conditionalOn ? this.evaluateConditionalOn(item.conditionalOn, form) : true;
-
-    if (item.key) {
-      const control = form.get(item.key);
-
-      if (control) {
-        if (isVisible) {
-          if (!item.disabled) control.enable({ emitEvent: false });
-        } else {
-          control.disable({ emitEvent: false });
-        }
-
-        if (item.validators?.length && !item.disabled) {
-          control.setValidators(item.validators);
-        } else {
-          control.clearValidators();
-        }
-
-        control.updateValueAndValidity({ emitEvent: false });
-      }
-    }
-
-    // Recurse on children
-    if (item.children?.length) {
-      item.children.forEach(child => this.isVisible(child, form));
-    }
-
-    return isVisible;
-  }
-
   isSectionVisible(section: FormSection, form: FormGroup): boolean {
     const isVisible = section.conditionalOn ? this.evaluateConditionalOn(section.conditionalOn, form) : true;
 

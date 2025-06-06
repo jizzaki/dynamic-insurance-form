@@ -64,6 +64,21 @@ export class MultiStepFormComponent implements OnInit {
     }
   }
 
+  onSubmit(): void {
+    const result = this.formEngineService.validateVisibleFields(
+      this.form,
+      this.pages,
+      this.currentPageIndex
+    );
+
+    if (!result.isValid) {
+      console.log('Invalid controls:', result.invalidKeys);
+      return;
+    }
+
+    console.log('Submitted', this.form.value);
+  }
+
   private calculatePremium(): void {
     this.premiumLoading = true;
     this.premiumError = '';
@@ -120,21 +135,6 @@ export class MultiStepFormComponent implements OnInit {
     //     this.paymentLoading = false;
     //   }
     // });
-  }
-
-  onSubmit(): void {
-    const result = this.formEngineService.validateVisibleFields(
-      this.form,
-      this.pages,
-      this.currentPageIndex
-    );
-
-    if (!result.isValid) {
-      console.log('Invalid controls:', result.invalidKeys);
-      return;
-    }
-
-    console.log('Submitted', this.form.value);
   }
 
 }
