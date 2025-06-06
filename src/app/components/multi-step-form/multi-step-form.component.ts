@@ -26,16 +26,17 @@ export class MultiStepFormComponent implements OnInit {
     , private http: HttpClient) { }
 
   ngOnInit(): void {
-    const allSections = this.pages.flatMap(p => p.sections);
-    this.form = this.formEngineService.buildForm(allSections, this.form, this.pages);
+    this.form = this.formEngineService.buildForm(this.pages);
   }
 
   goToNextStep(): void {
 
-    const result = this.formEngineService.validateVisibleFieldsForPage(
+    const result = this.formEngineService.validateVisibleFields(
       this.form,
-      this.pages[this.currentPageIndex]
+      this.pages,
+      this.currentPageIndex
     );
+
 
     if (!result.isValid) {
       console.log('Invalid controls:', result.invalidKeys);
@@ -56,7 +57,6 @@ export class MultiStepFormComponent implements OnInit {
         break;
     }
   }
-
 
   goToPreviousStep(): void {
     if (this.currentPageIndex > 0) {
@@ -123,39 +123,18 @@ export class MultiStepFormComponent implements OnInit {
   }
 
   onSubmit(): void {
+    const result = this.formEngineService.validateVisibleFields(
+      this.form,
+      this.pages,
+      this.currentPageIndex
+    );
 
-    this.pages.forEach(page => {
-      page.sections.forEach(section => {
-        section.questions.forEach(q => {
-          const sectionVisible = section.conditionalOn
-            ? this.formEngineService.evaluateConditionalOn(section.conditionalOn, this.form)
-            : true;
-
-          this.formEngineService.isVisible(q, this.form, sectionVisible);
-        });
-      });
-    });
-
-    this.logInvalidControls(this.form);
-
-    console.log(this.form.valid)
-    if (this.form.valid) {
-      console.log('Submitted', this.form.value);
+    if (!result.isValid) {
+      console.log('Invalid controls:', result.invalidKeys);
+      return;
     }
-  }
 
-  logInvalidControls(form: FormGroup, parentKey: string = ''): void {
-    Object.keys(form.controls).forEach(key => {
-      const control = form.get(key);
-
-      const fullKey = parentKey ? `${parentKey}.${key}` : key;
-
-      if (control instanceof FormGroup) {
-        this.logInvalidControls(control, fullKey);
-      } else if (control && control.invalid) {
-        console.warn(`Invalid control: ${fullKey}`, control.errors);
-      }
-    });
+    console.log('Submitted', this.form.value);
   }
 
 }

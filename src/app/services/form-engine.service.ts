@@ -4,27 +4,36 @@ import { ConditionalOn, FormPage, FormQuestion, FormSection, Math } from '../mod
 import { ConditionalOperator } from '../enums/conditional-operator';
 import { MathOperands } from '../enums/math-operands';
 
+
 @Injectable({ providedIn: 'root' })
 export class FormEngineService {
   constructor(private fb: FormBuilder) { }
 
-
-  buildForm(sections: FormSection[], form?: FormGroup, pages?: FormPage[]): FormGroup {
+  buildForm(pages: FormPage[]): FormGroup;
+  buildForm(sections: FormSection[]): FormGroup;
+  buildForm(input: FormPage[] | FormSection[]): FormGroup {
     const group: Record<string, FormControl> = {};
+    const form = new FormGroup({});
+    let formGroup: FormGroup;
 
-    // Step 1: Initialize all controls
+    // Normalize sections and optionally retain pages
+    const isPages = this.isFormPageArray(input);
+    const formPages: FormPage[] = isPages ? input as FormPage[] : [];
+    const sections: FormSection[] = isPages
+      ? formPages.flatMap(p => p.sections)
+      : input as FormSection[];
+
+    // Step 1: Initialize controls
     for (const section of sections) {
       if (!Array.isArray(section.questions)) continue;
 
-      if (section.repeatFor) {
-        this.initializeRepeatableSection(group, section, form);
-      } else {
-        this.initializeFlatSection(group, section);
-      }
+      section.repeatFor
+        ? this.initializeRepeatableSection(group, section, form)
+        : this.initializeFlatSection(group, section);
     }
 
-    // Step 2: Create form group
-    const formGroup = this.fb.group(group);
+    // Step 2: Build form group
+    formGroup = this.fb.group(group);
 
     // Step 3: Setup math field watchers
     for (const section of sections) {
@@ -37,12 +46,12 @@ export class FormEngineService {
       }
     }
 
-    // Step 4: Set up dynamic repeat section watchers
-    pages.forEach(page => {
+    // Step 4: Setup repeat section watchers (only if FormPages were passed)
+    formPages.forEach(page => {
       page.sections
         .filter(section => section.repeatFor?.key && section.questions)
         .forEach(section => {
-          const repeatKey = section.repeatFor.key;
+          const repeatKey = section.repeatFor!.key;
           const repeatControl = formGroup.get(repeatKey);
 
           if (repeatControl) {
@@ -50,7 +59,6 @@ export class FormEngineService {
               this.handleRepeatSection(formGroup, section, count);
             });
 
-            // Initialize on preloaded value
             if (repeatControl.value) {
               this.handleRepeatSection(formGroup, section, repeatControl.value);
             }
@@ -58,17 +66,8 @@ export class FormEngineService {
         });
     });
 
-
-    // Step 5: Evaluate initial visibility across all questions
-    sections.forEach(section => {
-      section.questions.forEach(q => {
-        const sectionVisible = section.conditionalOn
-          ? this.evaluateConditionalOn(section.conditionalOn, formGroup)
-          : true;
-
-        this.isVisible(q, formGroup, sectionVisible);
-      });
-    });
+    // Step 5: Evaluate initial visibility once controls exist
+    this.evaluateInitialVisibility(sections, formGroup);
 
     return formGroup;
   }
@@ -119,6 +118,67 @@ export class FormEngineService {
     };
   }
 
+  validateVisibleFields(form: FormGroup, pages: FormPage[], currentPageIndex: number) {
+  const invalidKeys: string[] = [];
+
+  const targetPages = currentPageIndex === pages.length - 1
+    ? pages // validate all pages on last step
+    : [pages[currentPageIndex]];
+
+  targetPages.forEach(page => {
+    page.sections.forEach(section => {
+      const sectionVisible = section.conditionalOn
+        ? this.evaluateConditionalOn(section.conditionalOn, form)
+        : true;
+
+      section.questions.forEach(q => {
+        const visible = this.isVisible(q, form, sectionVisible);
+        if (!visible) return;
+
+        if (section.repeatFor?.key) {
+          const repeatCount = form.get(section.repeatFor.key)?.value || 0;
+          for (let i = 0; i < repeatCount; i++) {
+            const ctrl = form.get(`${q.key}_${i}`);
+            if (ctrl?.enabled && ctrl.invalid) {
+              ctrl.markAsTouched();
+              invalidKeys.push(`${q.key}_${i}`);
+            }
+          }
+        } else {
+          const ctrl = form.get(q.key);
+          if (ctrl?.enabled && ctrl.invalid) {
+            ctrl.markAsTouched();
+            invalidKeys.push(q.key);
+          }
+        }
+      });
+    });
+  });
+
+  return { isValid: invalidKeys.length === 0, invalidKeys };
+}
+
+
+  private isFormPageArray(input: any[]): input is FormPage[] {
+    return input.length > 0 &&
+      input.every(p => typeof p === 'object' && 'sections' in p && Array.isArray(p.sections));
+  }
+
+
+  private evaluateInitialVisibility(sections: FormSection[], formGroup: FormGroup) {
+
+    // Step 5: Evaluate initial visibility across all questions
+    sections.forEach(section => {
+      section.questions.forEach(q => {
+        const sectionVisible = section.conditionalOn
+          ? this.evaluateConditionalOn(section.conditionalOn, formGroup)
+          : true;
+
+        this.isVisible(q, formGroup, sectionVisible);
+      });
+    });
+
+  }
 
   private initializeRepeatableSection(group: Record<string, FormControl>, section: FormSection, form?: FormGroup): void {
     const repeatCount = form?.get(section.repeatFor!.key)?.value || 0;
@@ -130,7 +190,7 @@ export class FormEngineService {
 
         // Handle nested children
         if (question.children) {
-          const childGroup = this.buildForm([{ questions: question.children }]);
+          const childGroup = this.buildForm([{ questions: question.children } as FormSection]);
           Object.keys(childGroup.controls).forEach(childKey => {
             group[`${childKey}_${i}`] = childGroup.get(childKey) as FormControl;
           });
@@ -154,7 +214,7 @@ export class FormEngineService {
 
       // Handle nested children
       if (question.children) {
-        const childGroup = this.buildForm([{ questions: question.children }]);
+        const childGroup = this.buildForm([{ questions: question.children } as FormSection]);
         Object.assign(group, childGroup.controls);
       }
     }
