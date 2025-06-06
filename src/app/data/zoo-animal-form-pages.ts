@@ -72,7 +72,7 @@ export const ZOO_ANIMAL_INSURANCE_FORM: FormPage[] = [
               MathValidator.validate(ConditionalOperator.GreaterThan, 0)
             ],
             math: {
-              operation: MathOperands.Add,
+              operation: MathOperands.Sum,
               dependsOn: ['costOfAnimal', 'costOfAnimalExpenses'],
             }
           }

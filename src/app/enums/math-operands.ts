@@ -1,5 +1,5 @@
 export enum MathOperands {
-  Add = "+",
+  Sum = "+",
   Subtract = "-",
   Multiply = "x",
   Divide = "/"

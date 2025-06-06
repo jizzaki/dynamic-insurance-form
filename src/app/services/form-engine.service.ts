@@ -405,7 +405,7 @@ export class FormEngineService {
       if (i === 0) return val;
       const op = operands[i - 1];
       switch (op) {
-        case MathOperands.Add: return acc + val;
+        case MathOperands.Sum: return acc + val;
         case MathOperands.Subtract: return acc - val;
         case MathOperands.Multiply: return acc * val;
         case MathOperands.Divide: return acc / val;
@@ -417,7 +417,7 @@ export class FormEngineService {
   computeMathValue(form: FormGroup, math: Math): number {
     const values = math.dependsOn.map(key => Number(form.get(key)?.value || 0));
     switch (math.operation) {
-      case MathOperands.Add:
+      case MathOperands.Sum:
         return values.reduce((acc, val) => acc + val, 0);
       case MathOperands.Subtract:
         return values.reduce((acc, val) => acc - val);
