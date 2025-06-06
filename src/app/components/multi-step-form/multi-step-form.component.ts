@@ -31,55 +31,16 @@ export class MultiStepFormComponent implements OnInit {
   }
 
   goToNextStep(): void {
-    const visibleFields: string[] = [];
-    const hiddenFields: string[] = [];
-    const currentPage = this.pages[this.currentPageIndex];
 
-    const flattenQuestions = (questions: FormQuestion[]): FormQuestion[] =>
-      questions.flatMap(q => [q, ...(q.children ? flattenQuestions(q.children) : [])]);
+    const result = this.formEngineService.validateVisibleFieldsForPage(
+      this.form,
+      this.pages[this.currentPageIndex]
+    );
 
-    const allQuestions: { question: FormQuestion; key: string }[] = [];
-
-    currentPage.sections.forEach(section => {
-      const sectionVisible = section.conditionalOn
-        ? this.formEngineService.evaluateConditionalOn(section.conditionalOn, this.form)
-        : true;
-
-      section.questions.forEach(question => {
-        const isVisible = this.formEngineService.isVisible(question, this.form, sectionVisible);
-
-        (isVisible ? visibleFields : hiddenFields).push(question.key);
-
-        if (!isVisible) return;
-
-        if (section.repeatFor?.key) {
-          const repeatCount = this.form.get(section.repeatFor.key)?.value || 0;
-          for (let i = 0; i < repeatCount; i++) {
-            allQuestions.push({ question, key: `${question.key}_${i}` });
-          }
-        } else {
-          flattenQuestions([question]).forEach(child =>
-            allQuestions.push({ question: child, key: child.key })
-          );
-        }
-      });
-    });
-
-    const invalidControls = allQuestions
-      .map(({ question, key }) => {
-        const ctrl = this.form.get(key);
-        return { key, ctrl };
-      })
-      .filter(({ ctrl }) => ctrl && ctrl.enabled && ctrl.invalid);
-
-    if (invalidControls.length > 0) {
-      console.log('Invalid controls:', invalidControls.map(({ key }) => key));
-      invalidControls.forEach(({ ctrl }) => ctrl?.markAsTouched());
+    if (!result.isValid) {
+      console.log('Invalid controls:', result.invalidKeys);
       return;
     }
-
-    console.log('Visible fields:', visibleFields);
-    console.log('Hidden fields:', hiddenFields);
 
     switch (this.currentPageIndex) {
       case 0:

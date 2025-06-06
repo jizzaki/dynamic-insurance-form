@@ -73,6 +73,53 @@ export class FormEngineService {
     return formGroup;
   }
 
+  validateVisibleFieldsForPage(
+    form: FormGroup,
+    page: FormPage
+  ): { isValid: boolean; invalidKeys: string[] } {
+    const invalidKeys: string[] = [];
+    const flattenQuestionsFn = (questions: FormQuestion[]): FormQuestion[] =>
+      questions.flatMap(q => [q, ...(q.children ? flattenQuestionsFn(q.children) : [])]);
+
+    page.sections.forEach(section => {
+      const sectionVisible = section.conditionalOn
+        ? this.evaluateConditionalOn(section.conditionalOn, form)
+        : true;
+
+      section.questions.forEach(question => {
+        const isVisible = this.isVisible(question, form, sectionVisible);
+        if (!isVisible) return;
+
+        if (section.repeatFor?.key) {
+          const repeatCount = form.get(section.repeatFor.key)?.value || 0;
+          for (let i = 0; i < repeatCount; i++) {
+            const key = `${question.key}_${i}`;
+            const ctrl = form.get(key);
+            if (ctrl && ctrl.enabled && ctrl.invalid) {
+              ctrl.markAsTouched();
+              invalidKeys.push(key);
+            }
+          }
+        } else {
+          flattenQuestionsFn([question]).forEach(child => {
+            const key = child.key;
+            const ctrl = form.get(key);
+            if (ctrl && ctrl.enabled && ctrl.invalid) {
+              ctrl.markAsTouched();
+              invalidKeys.push(key);
+            }
+          });
+        }
+      });
+    });
+
+    return {
+      isValid: invalidKeys.length === 0,
+      invalidKeys
+    };
+  }
+
+
   private initializeRepeatableSection(group: Record<string, FormControl>, section: FormSection, form?: FormGroup): void {
     const repeatCount = form?.get(section.repeatFor!.key)?.value || 0;
 
