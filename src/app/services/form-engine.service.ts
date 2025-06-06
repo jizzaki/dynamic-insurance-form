@@ -7,9 +7,10 @@ import { MathOperands } from '../enums/math-operands';
 
 @Injectable({ providedIn: 'root' })
 export class FormEngineService {
-  // ======================================================
+  // ====================================================================
+  // Author: Eric Tijerina 
   // =   Core Form Engine Service Logic   =
-  // ======================================================
+  // ====================================================================
   constructor(private fb: FormBuilder) { }
 
   /** Builds a dynamic reactive FormGroup from FormPages or Sections. */
@@ -48,7 +49,7 @@ export class FormEngineService {
   }
 
   /** Validates visible fields for either current or all pages depending on index. */
-  validateVisibleFields(form: FormGroup, pages: FormPage[], currentPageIndex: number) {
+  validateForm(form: FormGroup, pages: FormPage[], currentPageIndex: number) {
     const targetPages = currentPageIndex === pages.length - 1 ? pages : [pages[currentPageIndex]];
     const invalidKeys: string[] = [];
     targetPages.forEach(p => p.sections.forEach(s => this.processSectionQuestions(s, form, invalidKeys)));
@@ -193,9 +194,9 @@ export class FormEngineService {
   }
 
 
-  // ===========================
+  // =================================================================================
   // =     Helper Methods     =
-  // ===========================
+  // =================================================================================
   private setupMathWatchers(form: FormGroup, question: FormQuestion): void {
     const updateComputedValue = () => {
       const newValue = this.computeMathValue(form, question.math!);

@@ -31,7 +31,7 @@ export class MultiStepFormComponent implements OnInit {
 
   goToNextStep(): void {
 
-    const result = this.formEngineService.validateVisibleFields(
+    const result = this.formEngineService.validateForm(
       this.form,
       this.pages,
       this.currentPageIndex
@@ -65,7 +65,7 @@ export class MultiStepFormComponent implements OnInit {
   }
 
   onSubmit(): void {
-    const result = this.formEngineService.validateVisibleFields(
+    const result = this.formEngineService.validateForm(
       this.form,
       this.pages,
       this.currentPageIndex
