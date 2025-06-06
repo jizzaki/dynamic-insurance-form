@@ -88,8 +88,8 @@ export const ZOO_ANIMAL_INSURANCE_FORM: FormPage[] = [
           ]
         },
         questions: [
-          { key: 'animalName', label: 'Where was the tiger born?', type: 'text', validators: [Validators.required] },
-          { key: 'animalAge', label: 'Name of the original owner?', type: 'text', validators: [Validators.required] },
+          { key: 'animalNameSenior', label: 'Where was the tiger born?', type: 'text', validators: [Validators.required] },
+          { key: 'animalAgeSenior', label: 'Name of the original owner?', type: 'text', validators: [Validators.required] },
         ]
       },
       {

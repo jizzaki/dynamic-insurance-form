@@ -31,58 +31,55 @@ export class MultiStepFormComponent implements OnInit {
   }
 
   goToNextStep(): void {
+    const visibleFields: string[] = [];
+    const hiddenFields: string[] = [];
     const currentPage = this.pages[this.currentPageIndex];
 
     const flattenQuestions = (questions: FormQuestion[]): FormQuestion[] =>
       questions.flatMap(q => [q, ...(q.children ? flattenQuestions(q.children) : [])]);
 
-    const visibleSections = currentPage.sections.filter(section =>
-      this.formEngineService.isSectionVisible(section, this.form)
-    );
-
-    // Collect real FormQuestions with repeat metadata
     const allQuestions: { question: FormQuestion; key: string }[] = [];
 
-    visibleSections.forEach(section => {
-      if (section.repeatFor?.key) {
-        const repeatCount = this.form.get(section.repeatFor.key)?.value || 0;
-        section.questions.forEach(question => {
+    currentPage.sections.forEach(section => {
+      const sectionVisible = section.conditionalOn
+        ? this.formEngineService.evaluateConditionalOn(section.conditionalOn, this.form)
+        : true;
+
+      section.questions.forEach(question => {
+        const isVisible = this.formEngineService.isVisible(question, this.form, sectionVisible);
+
+        (isVisible ? visibleFields : hiddenFields).push(question.key);
+
+        if (!isVisible) return;
+
+        if (section.repeatFor?.key) {
+          const repeatCount = this.form.get(section.repeatFor.key)?.value || 0;
           for (let i = 0; i < repeatCount; i++) {
-            allQuestions.push({
-              question,
-              key: `${question.key}_${i}`
-            });
+            allQuestions.push({ question, key: `${question.key}_${i}` });
           }
-        });
-      } else {
-        flattenQuestions(section.questions).forEach(q =>
-          allQuestions.push({ question: q, key: q.key })
-        );
-      }
-    });
-
-    // Visibility + validation
-    allQuestions.forEach(({ question, key }) => {
-      const ctrl = this.form.get(key);
-      const isVisible = this.formEngineService.isVisible(question, this.form);
-
-      if (ctrl) {
-        if (!isVisible) {
-          ctrl.markAsUntouched();
         } else {
-          ctrl.updateValueAndValidity({ emitEvent: false });
+          flattenQuestions([question]).forEach(child =>
+            allQuestions.push({ question: child, key: child.key })
+          );
         }
-      }
+      });
     });
 
     const invalidControls = allQuestions
-      .map(({ key }) => this.form.get(key))
-      .filter(ctrl => ctrl && ctrl.enabled && ctrl.invalid);
+      .map(({ question, key }) => {
+        const ctrl = this.form.get(key);
+        return { key, ctrl };
+      })
+      .filter(({ ctrl }) => ctrl && ctrl.enabled && ctrl.invalid);
 
     if (invalidControls.length > 0) {
-      invalidControls.forEach(ctrl => ctrl.markAsTouched());
+      console.log('Invalid controls:', invalidControls.map(({ key }) => key));
+      invalidControls.forEach(({ ctrl }) => ctrl?.markAsTouched());
       return;
     }
+
+    console.log('Visible fields:', visibleFields);
+    console.log('Hidden fields:', hiddenFields);
 
     switch (this.currentPageIndex) {
       case 0:
@@ -98,6 +95,7 @@ export class MultiStepFormComponent implements OnInit {
         break;
     }
   }
+
 
   goToPreviousStep(): void {
     if (this.currentPageIndex > 0) {
@@ -145,7 +143,7 @@ export class MultiStepFormComponent implements OnInit {
 
     // TEMP
     this.paymentSuccess = true;
-    this.last4Digits = paymentPayload.account.slice(-4);
+    //this.last4Digits = paymentPayload.account.slice(-4);
     this.paymentLoading = false;
     this.currentPageIndex++;
 
@@ -164,10 +162,39 @@ export class MultiStepFormComponent implements OnInit {
   }
 
   onSubmit(): void {
+
+    this.pages.forEach(page => {
+      page.sections.forEach(section => {
+        section.questions.forEach(q => {
+          const sectionVisible = section.conditionalOn
+            ? this.formEngineService.evaluateConditionalOn(section.conditionalOn, this.form)
+            : true;
+
+          this.formEngineService.isVisible(q, this.form, sectionVisible);
+        });
+      });
+    });
+
+    this.logInvalidControls(this.form);
+
     console.log(this.form.valid)
     if (this.form.valid) {
       console.log('Submitted', this.form.value);
     }
+  }
+
+  logInvalidControls(form: FormGroup, parentKey: string = ''): void {
+    Object.keys(form.controls).forEach(key => {
+      const control = form.get(key);
+
+      const fullKey = parentKey ? `${parentKey}.${key}` : key;
+
+      if (control instanceof FormGroup) {
+        this.logInvalidControls(control, fullKey);
+      } else if (control && control.invalid) {
+        console.warn(`Invalid control: ${fullKey}`, control.errors);
+      }
+    });
   }
 
 }

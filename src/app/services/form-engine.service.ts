@@ -58,6 +58,18 @@ export class FormEngineService {
         });
     });
 
+
+    // Step 5: Evaluate initial visibility across all questions
+    sections.forEach(section => {
+      section.questions.forEach(q => {
+        const sectionVisible = section.conditionalOn
+          ? this.evaluateConditionalOn(section.conditionalOn, formGroup)
+          : true;
+
+        this.isVisible(q, formGroup, sectionVisible);
+      });
+    });
+
     return formGroup;
   }
 
@@ -101,14 +113,20 @@ export class FormEngineService {
     }
   }
 
-  private initializeQuestionControl(question: FormQuestion): FormControl {
+  // Also cache validators during form control initialization
+  initializeQuestionControl(question: FormQuestion): FormControl {
     const initialValue = question.type === 'checkbox-group' ? [] : null;
     const validators = question.validators ? [...question.validators] : [];
 
-    return new FormControl(
+    const control = new FormControl(
       { value: initialValue, disabled: !!question.conditionalOn || !!question.disabled },
       validators
     );
+
+    // Cache validators for visibility toggling
+    (control as any)._originalValidators = validators;
+
+    return control;
   }
 
   private setupMathWatchers(form: FormGroup, question: FormQuestion): void {
@@ -125,8 +143,37 @@ export class FormEngineService {
     updateComputedValue(); // Initialize
   }
 
+  isVisible(item: FormQuestion, form: FormGroup, parentVisible = true): boolean {
+    const selfVisible = item.conditionalOn ? this.evaluateConditionalOn(item.conditionalOn, form) : true;
+    const isVisible = selfVisible && parentVisible;
+    const control = item.key ? form.get(item.key) : null;
 
-  isVisible(item: FormQuestion, form: FormGroup): boolean {
+    if (control) {
+      // Cache original validators once
+      if (!(control as any)._originalValidators) {
+        (control as any)._originalValidators = control.validator ? [control.validator] : [];
+      }
+
+      if (isVisible) {
+        control.setValidators((control as any)._originalValidators);
+        control.enable({ emitEvent: false });
+      } else {
+        control.clearValidators();
+        control.disable({ emitEvent: false });
+      }
+
+      control.updateValueAndValidity({ emitEvent: false });
+    }
+
+    // Recurse on children
+    if (item.children?.length) {
+      item.children.forEach(child => this.isVisible(child, form, isVisible));
+    }
+
+    return isVisible;
+  }
+
+  isVisibleOld(item: FormQuestion, form: FormGroup): boolean {
     const isVisible = item.conditionalOn ? this.evaluateConditionalOn(item.conditionalOn, form) : true;
 
     if (item.key) {
@@ -338,11 +385,10 @@ export class FormEngineService {
           this.setupMathWatchers(form, scopedQuestion);
         }
 
-        
+
       });
     }
   }
-
 
   toggleCheckboxValue(form: FormGroup, key: string, value: string): void {
     const control = form.get(key);
