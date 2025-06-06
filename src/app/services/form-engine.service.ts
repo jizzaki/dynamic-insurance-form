@@ -7,8 +7,12 @@ import { MathOperands } from '../enums/math-operands';
 
 @Injectable({ providedIn: 'root' })
 export class FormEngineService {
+  // ======================================================
+  // =   Core Form Engine Service Logic   =
+  // ======================================================
   constructor(private fb: FormBuilder) { }
 
+  /** Builds a dynamic reactive FormGroup from FormPages or Sections. */
   buildForm(pages: FormPage[]): FormGroup;
   buildForm(sections: FormSection[]): FormGroup;
   buildForm(input: FormPage[] | FormSection[]): FormGroup {
@@ -43,6 +47,7 @@ export class FormEngineService {
     return formGroup;
   }
 
+  /** Validates visible fields for either current or all pages depending on index. */
   validateVisibleFields(form: FormGroup, pages: FormPage[], currentPageIndex: number) {
     const targetPages = currentPageIndex === pages.length - 1 ? pages : [pages[currentPageIndex]];
     const invalidKeys: string[] = [];
@@ -50,8 +55,10 @@ export class FormEngineService {
     return { isValid: invalidKeys.length === 0, invalidKeys };
   }
 
+  /** Determines and applies visibility of a question and its children. */
   isVisible(item: FormQuestion, form: FormGroup, parentVisible = true): boolean {
     const selfVisible = item.conditionalOn ? this.evaluateConditionalOn(item.conditionalOn, form) : true;
+    /** Determines and applies visibility of a question and its children. */
     const isVisible = selfVisible && parentVisible;
     const control = item.key ? form.get(item.key) : null;
 
@@ -61,6 +68,7 @@ export class FormEngineService {
         (control as any)._originalValidators = control.validator ? [control.validator] : [];
       }
 
+      /** Determines and applies visibility of a question and its children. */
       if (isVisible) {
         control.setValidators((control as any)._originalValidators);
         control.enable({ emitEvent: false });
@@ -74,16 +82,21 @@ export class FormEngineService {
 
     // Recurse on children
     if (item.children?.length) {
+      /** Determines and applies visibility of a question and its children. */
       item.children.forEach(child => this.isVisible(child, form, isVisible));
     }
 
+    /** Determines and applies visibility of a question and its children. */
     return isVisible;
   }
 
+  /** Determines visibility of an entire section and clears values if hidden. */
   isSectionVisible(section: FormSection, form: FormGroup): boolean {
+    /** Determines and applies visibility of a question and its children. */
     const isVisible = section.conditionalOn ? this.evaluateConditionalOn(section.conditionalOn, form) : true;
 
     // If not visible, clear and disable all controls in this section
+    /** Determines and applies visibility of a question and its children. */
     if (!isVisible) {
       section.questions.forEach(q => {
         const ctrl = form.get(q.key);
@@ -96,6 +109,7 @@ export class FormEngineService {
       });
     }
 
+    /** Determines and applies visibility of a question and its children. */
     return isVisible;
   }
 
@@ -103,6 +117,7 @@ export class FormEngineService {
     return Array.from({ length: count }, (_, i) => i);
   }
 
+  /** Adds or removes a value from a checkbox group control. */
   toggleCheckboxValue(form: FormGroup, key: string, value: string): void {
     const control = form.get(key);
     if (!control) return;
@@ -130,6 +145,7 @@ export class FormEngineService {
 
         // Handle nested children
         if (question.children) {
+          /** Builds a dynamic reactive FormGroup from FormPages or Sections. */
           const childGroup = this.buildForm([{ questions: question.children } as FormSection]);
           Object.keys(childGroup.controls).forEach(childKey => {
             group[`${childKey}_${i}`] = childGroup.get(childKey) as FormControl;
@@ -169,12 +185,17 @@ export class FormEngineService {
 
       // Handle nested children
       if (question.children) {
+        /** Builds a dynamic reactive FormGroup from FormPages or Sections. */
         const childGroup = this.buildForm([{ questions: question.children } as FormSection]);
         Object.assign(group, childGroup.controls);
       }
     }
   }
 
+
+  // ===========================
+  // =     Helper Methods     =
+  // ===========================
   private setupMathWatchers(form: FormGroup, question: FormQuestion): void {
     const updateComputedValue = () => {
       const newValue = this.computeMathValue(form, question.math!);
@@ -189,6 +210,7 @@ export class FormEngineService {
     updateComputedValue(); // Initialize
   }
 
+  /** Watches repeat control value and dynamically adjusts repeat section controls. */
   private setupRepeatWatcher(formGroup: FormGroup, section: FormSection): void {
     const repeatKey = section.repeatFor!.key;
     const repeatControl = formGroup.get(repeatKey);
@@ -207,6 +229,7 @@ export class FormEngineService {
           ? this.evaluateConditionalOn(section.conditionalOn, formGroup)
           : true;
 
+        /** Determines and applies visibility of a question and its children. */
         this.isVisible(q, formGroup, sectionVisible);
       });
     });
@@ -360,15 +383,18 @@ export class FormEngineService {
     }
   }
 
+  /** Loops through a section's questions and applies visibility + validation. */
   private processSectionQuestions(section: FormSection, form: FormGroup, invalidKeys: string[]): void {
     const sectionVisible = section.conditionalOn ? this.evaluateConditionalOn(section.conditionalOn, form) : true;
     section.questions.forEach(q => {
+      /** Determines and applies visibility of a question and its children. */
       const visible = this.isVisible(q, form, sectionVisible);
       if (!visible) return;
       section.repeatFor?.key ? this.validateRepeatedQuestion(form, q, section.repeatFor.key, invalidKeys) : this.validateQuestion(form, q, invalidKeys);
     });
   }
 
+  /** Validates all repeated controls of a repeatable question. */
   private validateRepeatedQuestion(form: FormGroup, question: FormQuestion, repeatKey: string, invalidKeys: string[]): void {
     const repeatCount = form.get(repeatKey)?.value || 0;
     for (let i = 0; i < repeatCount; i++) {
@@ -377,6 +403,7 @@ export class FormEngineService {
     }
   }
 
+  /** Recursively validates a question and its children. */
   private validateQuestion(form: FormGroup, question: FormQuestion, invalidKeys: string[]): void {
     const stack: FormQuestion[] = [question];
     while (stack.length) {
@@ -387,6 +414,7 @@ export class FormEngineService {
     }
   }
 
+  /** Marks control as touched and collects invalid keys if control is invalid. */
   private markInvalidIfNeeded(form: FormGroup, key: string, invalidKeys: string[]) {
     const ctrl = form.get(key);
     if (ctrl?.enabled && ctrl.invalid) {
@@ -395,6 +423,7 @@ export class FormEngineService {
     }
   }
 
+  //** Recursively check all nested conditions have values. */ 
   private hasAllKeysFilled(cond: ConditionalOn, form: FormGroup): boolean {
     if (cond.key) {
       const val = form.get(cond.key)?.value;
