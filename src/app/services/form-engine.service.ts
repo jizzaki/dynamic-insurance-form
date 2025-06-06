@@ -115,6 +115,11 @@ export class FormEngineService {
     }
   }
 
+  private isFormPageArray(input: any[]): input is FormPage[] {
+    return input.length > 0 &&
+      input.every(p => typeof p === 'object' && 'sections' in p && Array.isArray(p.sections));
+  }
+
   private initializeRepeatableSection(group: Record<string, FormControl>, section: FormSection, form?: FormGroup): void {
     const repeatCount = form?.get(section.repeatFor!.key)?.value || 0;
 
@@ -401,11 +406,6 @@ export class FormEngineService {
     }
 
     return true;
-  }
-
-  private isFormPageArray(input: any[]): input is FormPage[] {
-    return input.length > 0 &&
-      input.every(p => typeof p === 'object' && 'sections' in p && Array.isArray(p.sections));
   }
 
 } 
