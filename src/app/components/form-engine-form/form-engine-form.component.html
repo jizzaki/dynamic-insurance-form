@@ -44,11 +44,7 @@
       <app-form-summary [pages]="pages" [form]="form"></app-form-summary>
     </ng-container>
 
-    <!-- NAV BUTTONS -->
-    <div class="mt-4 d-flex justify-content-between">
-      <button type="button" class="btn btn-outline-secondary" (click)="goToPreviousStep()" [disabled]="currentPage === 0" *ngIf="currentPage > 0">Back</button>
-      <button type="button" class="btn btn-primary" (click)="goToNextStep()" *ngIf="currentPage < pages.length - 1">Next</button>
-      <button type="submit" class="btn btn-success" *ngIf="currentPage === pages.length - 1">Submit</button>
-    </div>
+
+
   </div>
 </form>

@@ -24,6 +24,7 @@ import { FormSummaryComponent } from './components/form-summary/form-summary.com
 import { FormEngineStepperComponent } from './components/form-engine-stepper/form-engine-stepper.component';
 import { ZooQuoteFormComponent } from './components/zoo-quote-form/zoo-quote-form.component';
 import { FormEngineFormComponent } from './components/form-engine-form/form-engine-form.component';
+import { FormEngineNavigationComponent } from './components/form-engine-navigation/form-engine-navigation.component';
 
 providers: [provideNgxMask()]
 
@@ -32,6 +33,7 @@ providers: [provideNgxMask()]
         AppComponent,
         FormEngineFormComponent,
         FormEngineStepperComponent,
+        FormEngineNavigationComponent,
         ZooQuoteFormComponent,
         QuestionRendererComponent,
         FormSummaryComponent,
@@ -48,11 +50,6 @@ providers: [provideNgxMask()]
         BrowserAnimationsModule,
         ReactiveFormsModule,
         HttpClientModule,
-        MatStepperModule,
-        MatInputModule,
-        MatSelectModule,
-        MatButtonModule,
-        MatProgressSpinnerModule
     ],
     providers: [provideNgxMask()],
     bootstrap: [AppComponent]

@@ -15,3 +15,8 @@
   (submitted)="onFormSubmitted($event)"
   (errors)="onFormErrors($event)">
 </form-engine-form>
+
+<form-engine-navigation
+  [totalPages]="pages.length"
+  [currentPage]="currentPageIndex">
+</form-engine-navigation>

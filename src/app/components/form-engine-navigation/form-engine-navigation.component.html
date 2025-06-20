@@ -1,0 +1,5 @@
+<div class="form-navigation mt-4 d-flex justify-content-between">
+  <button type="button" class="btn btn-outline-secondary" (click)="onPrevious()" *ngIf="currentPage > 0">Back</button>
+  <button type="button" class="btn btn-primary" (click)="onNext()" *ngIf="currentPage < totalPages - 1">Next</button>
+  <button type="submit" class="btn btn-success" (click)="onSubmit()" *ngIf="currentPage === totalPages - 1">Submit</button>
+</div>

@@ -23,6 +23,20 @@ export class FormEngineFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.formEngineService.emitPageVisited(this.currentPage);
+
+    // The form engine navigation component emits these page navigation events
+    this.formEngineService.nextPage$.subscribe(() => {
+      this.goToNextStep();
+    });
+
+    this.formEngineService.previousPage$.subscribe(() => {
+      this.goToPreviousStep();
+    });
+
+    this.formEngineService.submitForm$.subscribe(() => {
+      this.submit();
+    });
+
   }
 
   goToNextStep(): void {
@@ -39,7 +53,7 @@ export class FormEngineFormComponent implements OnInit {
 
     this.formEngineService.emitPageVisited(this.currentPage + 1);
     this.formEngineService.emitPageValidated(this.currentPage);
-    
+
     this.nextPage.emit();
   }
 

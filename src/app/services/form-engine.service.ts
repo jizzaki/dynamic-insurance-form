@@ -8,8 +8,14 @@ import { Subject } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class FormEngineService {
+  // Page event hub
   pageVisited$ = new Subject<number>();
   pageValidated$ = new Subject<number>();
+  // Navigation event hub
+  nextPage$ = new Subject<void>();
+  previousPage$ = new Subject<void>();
+  submitForm$ = new Subject<void>();
+
   // ====================================================================
   // Author: Eric Tijerina eric@liftrtech.com
   // =   Core Form Engine Service Logic   =
@@ -140,6 +146,18 @@ export class FormEngineService {
 
   emitPageValidated(index: number): void {
     this.pageValidated$.next(index);
+  }
+
+  emitNextPage(): void {
+    this.nextPage$.next();
+  }
+
+  emitPreviousPage(): void {
+    this.previousPage$.next();
+  }
+
+  emitSubmitForm(): void {
+    this.submitForm$.next();
   }
 
   private isFormPageArray(input: any[]): input is FormPage[] {
