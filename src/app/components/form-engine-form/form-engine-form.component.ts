@@ -11,33 +11,26 @@ import { FormPage } from 'src/app/models/form-question.model';
   standalone: false
 })
 export class FormEngineFormComponent implements OnInit {
-  @Input() currentPageIndex = 0;
+  @Input() currentPage = 0;
   @Input() pages: FormPage[] = [];
   @Input() form!: FormGroup;
   @Output() pageValidated = new EventEmitter<number>();
   @Output() pageVisited = new EventEmitter<number>();
-  @Output() nextPage = new EventEmitter<void>();
   @Output() previousPage = new EventEmitter<void>();
+  @Output() nextPage = new EventEmitter<void>();
+  @Output() submitted = new EventEmitter<void>();
 
-  premiumCalculated = false;
-  premiumLoading = false;
-  premiumError = '';
-  paymentSuccess = false;
-  paymentLoading = false;
-  paymentError = '';
-  last4Digits = '';
-
-  constructor(private formEngineService: FormEngineService, private http: HttpClient) {}
+  constructor(private formEngineService: FormEngineService, private http: HttpClient) { }
 
   ngOnInit(): void {
-    this.pageVisited.emit(this.currentPageIndex);
+    this.pageVisited.emit(this.currentPage);
   }
 
   goToNextStep(): void {
     const result = this.formEngineService.validateForm(
       this.form,
       this.pages,
-      this.currentPageIndex
+      this.currentPage
     );
 
     if (!result.isValid) {
@@ -45,32 +38,28 @@ export class FormEngineFormComponent implements OnInit {
       return;
     }
 
-    this.pageValidated.emit(this.currentPageIndex);
-    this.pageVisited.emit(this.currentPageIndex + 1);
+    this.pageValidated.emit(this.currentPage);
+    this.pageVisited.emit(this.currentPage + 1);
     this.nextPage.emit();
-    
+
   }
 
   goToPreviousStep(): void {
-    if (this.currentPageIndex > 0) {
-      this.pageVisited.emit(this.currentPageIndex - 1);
+    if (this.currentPage > 0) {
+      this.pageVisited.emit(this.currentPage - 1);
     }
     this.previousPage.emit();
   }
 
-  onSubmit(): void {
-    const result = this.formEngineService.validateForm(
-      this.form,
-      this.pages,
-      this.currentPageIndex
-    );
+  submit(): void {
+    const result = this.formEngineService.validateForm(this.form, this.pages, this.currentPage);
 
     if (!result.isValid) {
       console.log('Invalid controls:', result.invalidKeys);
       return;
     }
 
-    console.log('Submitted', this.form.value);
+    this.submitted.emit(this.form.value);
   }
 
 }

@@ -36,4 +36,8 @@ export class ZooQuoteFormComponent implements OnInit {
         }
     }
 
+    onFormSubmitted($event): void {
+        console.log('Submitted', $event);
+    }
+
 } 

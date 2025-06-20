@@ -1,7 +1,7 @@
-<form aria-label="Multi-step form" [formGroup]="form" (ngSubmit)="onSubmit()" class="container py-4" *ngIf="form && pages?.length" novalidate>
-  <div *ngIf="pages[currentPageIndex] as page">
+<form aria-label="Multi-step form" [formGroup]="form" (ngSubmit)="submit()" class="container py-4" *ngIf="form && pages?.length" novalidate>
+  <div *ngIf="pages[currentPage] as page">
     <!-- FORM STEPS -->
-    <ng-container *ngIf="currentPageIndex < pages.length - 1">
+    <ng-container *ngIf="currentPage < pages.length - 1">
       <ng-container *ngFor="let section of page.sections">
         <ng-container *ngIf="formEngineService.isSectionVisible(section, form)">
           <h3>{{ section.title }}</h3>
@@ -40,15 +40,15 @@
     </ng-container>
 
     <!-- CONFIRMATION SUMMARY (last page) // This can be moved and used as a router link -->
-    <ng-container *ngIf="currentPageIndex === pages.length - 1">
+    <ng-container *ngIf="currentPage === pages.length - 1">
       <app-form-summary [pages]="pages" [form]="form"></app-form-summary>
     </ng-container>
 
     <!-- NAV BUTTONS -->
     <div class="mt-4 d-flex justify-content-between">
-      <button type="button" class="btn btn-outline-secondary" (click)="goToPreviousStep()" [disabled]="currentPageIndex === 0" *ngIf="currentPageIndex > 0">Back</button>
-      <button type="button" class="btn btn-primary" (click)="goToNextStep()" *ngIf="currentPageIndex < pages.length - 1">Next</button>
-      <button type="submit" class="btn btn-success" *ngIf="currentPageIndex === pages.length - 1">Submit</button>
+      <button type="button" class="btn btn-outline-secondary" (click)="goToPreviousStep()" [disabled]="currentPage === 0" *ngIf="currentPage > 0">Back</button>
+      <button type="button" class="btn btn-primary" (click)="goToNextStep()" *ngIf="currentPage < pages.length - 1">Next</button>
+      <button type="submit" class="btn btn-success" *ngIf="currentPage === pages.length - 1">Submit</button>
     </div>
   </div>
 </form>

@@ -9,9 +9,10 @@
 <form-engine-form
   [form]="form"
   [pages]="pages"
-  [currentPageIndex]="currentPageIndex"
-  (pageValidated)="stepper.updateValidationState($event)"
+  [currentPage]="currentPageIndex"
+  (previousPage)="goToPreviousPage()"  
   (nextPage)="goToNextPage()"
+  (submitted)="onFormSubmitted($event)"
   (pageVisited)="stepper.markPageVisited($event)"
-  (previousPage)="goToPreviousPage()">
+  (pageValidated)="stepper.updateValidationState($event)">
 </form-engine-form>
