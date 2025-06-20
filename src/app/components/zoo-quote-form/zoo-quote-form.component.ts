@@ -40,4 +40,7 @@ export class ZooQuoteFormComponent implements OnInit {
         console.log('Submitted', $event);
     }
 
+    onFormErrors($event): void {
+        console.log('Invalid controls', $event);
+    }
 } 

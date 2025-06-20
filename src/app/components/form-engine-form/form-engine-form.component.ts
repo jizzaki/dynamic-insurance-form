@@ -17,6 +17,7 @@ export class FormEngineFormComponent implements OnInit {
   @Output() previousPage = new EventEmitter<void>();
   @Output() nextPage = new EventEmitter<void>();
   @Output() submitted = new EventEmitter<void>();
+  @Output() errors = new EventEmitter<any>();
 
   constructor(private formEngineService: FormEngineService, private http: HttpClient) { }
 
@@ -53,7 +54,7 @@ export class FormEngineFormComponent implements OnInit {
     const result = this.formEngineService.validateForm(this.form, this.pages, this.currentPage);
 
     if (!result.isValid) {
-      console.log('Invalid controls:', result.invalidKeys);
+      this.errors.emit(result.invalidKeys);
       return;
     }
 

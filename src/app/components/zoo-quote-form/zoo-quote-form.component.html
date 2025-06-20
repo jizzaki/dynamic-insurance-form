@@ -12,5 +12,6 @@
   [currentPage]="currentPageIndex"
   (previousPage)="goToPreviousPage()"  
   (nextPage)="goToNextPage()"
-  (submitted)="onFormSubmitted($event)">
+  (submitted)="onFormSubmitted($event)"
+  (errors)="onFormErrors($event)">
 </form-engine-form>
