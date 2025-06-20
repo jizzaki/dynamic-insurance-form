@@ -12,7 +12,5 @@
   [currentPage]="currentPageIndex"
   (previousPage)="goToPreviousPage()"  
   (nextPage)="goToNextPage()"
-  (submitted)="onFormSubmitted($event)"
-  (pageVisited)="stepper.markPageVisited($event)"
-  (pageValidated)="stepper.updateValidationState($event)">
+  (submitted)="onFormSubmitted($event)">
 </form-engine-form>

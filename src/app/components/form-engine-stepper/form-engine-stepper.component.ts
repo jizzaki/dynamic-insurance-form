@@ -22,8 +22,17 @@ export class FormEngineStepperComponent implements OnInit {
     constructor(public formEngineService: FormEngineService) { }
 
     ngOnInit(): void {
-      this.markPageVisited(this.currentPage);
+        this.formEngineService.pageVisited$.subscribe((index) => {
+            this.markPageVisited(index);
+        });
+
+        this.formEngineService.pageValidated$.subscribe((index) => {
+            this.updateValidationState(index);
+        });
+
+        this.markPageVisited(this.currentPage);
     }
+
 
 
     goToStep(index: number): void {

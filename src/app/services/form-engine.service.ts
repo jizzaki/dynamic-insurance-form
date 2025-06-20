@@ -3,12 +3,15 @@ import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ConditionalOn, FormPage, FormQuestion, FormSection, Math } from '../models/form-question.model';
 import { ConditionalOperator } from '../enums/conditional-operator';
 import { MathOperands } from '../enums/math-operands';
+import { Subject } from 'rxjs';
 
 
 @Injectable({ providedIn: 'root' })
 export class FormEngineService {
+  pageVisited$ = new Subject<number>();
+  pageValidated$ = new Subject<number>();
   // ====================================================================
-  // Author: Eric Tijerina 
+  // Author: Eric Tijerina eric@liftrtech.com
   // =   Core Form Engine Service Logic   =
   // ====================================================================
   constructor(private fb: FormBuilder) { }
@@ -129,6 +132,14 @@ export class FormEngineService {
     } else {
       control.setValue([...current, value]);
     }
+  }
+
+  emitPageVisited(index: number): void {
+    this.pageVisited$.next(index);
+  }
+
+  emitPageValidated(index: number): void {
+    this.pageValidated$.next(index);
   }
 
   private isFormPageArray(input: any[]): input is FormPage[] {

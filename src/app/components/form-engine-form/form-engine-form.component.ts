@@ -14,8 +14,6 @@ export class FormEngineFormComponent implements OnInit {
   @Input() currentPage = 0;
   @Input() pages: FormPage[] = [];
   @Input() form!: FormGroup;
-  @Output() pageValidated = new EventEmitter<number>();
-  @Output() pageVisited = new EventEmitter<number>();
   @Output() previousPage = new EventEmitter<void>();
   @Output() nextPage = new EventEmitter<void>();
   @Output() submitted = new EventEmitter<void>();
@@ -23,7 +21,7 @@ export class FormEngineFormComponent implements OnInit {
   constructor(private formEngineService: FormEngineService, private http: HttpClient) { }
 
   ngOnInit(): void {
-    this.pageVisited.emit(this.currentPage);
+    this.formEngineService.emitPageVisited(this.currentPage);
   }
 
   goToNextStep(): void {
@@ -38,15 +36,15 @@ export class FormEngineFormComponent implements OnInit {
       return;
     }
 
-    this.pageValidated.emit(this.currentPage);
-    this.pageVisited.emit(this.currentPage + 1);
+    this.formEngineService.emitPageVisited(this.currentPage + 1);
+    this.formEngineService.emitPageValidated(this.currentPage);
+    
     this.nextPage.emit();
-
   }
 
   goToPreviousStep(): void {
     if (this.currentPage > 0) {
-      this.pageVisited.emit(this.currentPage - 1);
+      this.formEngineService.emitPageVisited(this.currentPage - 1);
     }
     this.previousPage.emit();
   }
