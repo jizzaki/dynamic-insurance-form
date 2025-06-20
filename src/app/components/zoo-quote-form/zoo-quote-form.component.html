@@ -1,0 +1,17 @@
+<form-engine-stepper
+  #stepper
+  [form]="form"
+  [pages]="pages"
+  [currentPage]="currentPageIndex"
+  (stepChanged)="onStepChanged($event)">
+</form-engine-stepper>
+
+<form-engine-form
+  [form]="form"
+  [pages]="pages"
+  [currentPageIndex]="currentPageIndex"
+  (pageValidated)="stepper.updateValidationState($event)"
+  (nextPage)="goToNextPage()"
+  (pageVisited)="stepper.markPageVisited($event)"
+  (previousPage)="goToPreviousPage()">
+</form-engine-form>

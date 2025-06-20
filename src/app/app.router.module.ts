@@ -1,11 +1,11 @@
 import { RouterModule, Routes } from '@angular/router';
 import { AppComponent } from './app.component';
 import { NgModule } from '@angular/core';
-import { MultiStepFormComponent } from './components/multi-step-form/multi-step-form.component';
+import { ZooQuoteFormComponent } from './components/zoo-quote-form/zoo-quote-form.component';
 
 const routes: Routes = [
   { path: '', component: AppComponent },
-  { path: 'quote', component: MultiStepFormComponent },
+  { path: 'quote', component: ZooQuoteFormComponent },
   { path: '**', redirectTo: '' }
 ];
 
