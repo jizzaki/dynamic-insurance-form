@@ -41,3 +41,6 @@ Thumbs.db
 .angular/cache/19.2.14/Zoo.Forms/.tsbuildinfo
 .angular/cache/19.2.14/Zoo.Forms/.tsbuildinfo
 .angular/cache/19.2.14/Zoo.Forms/.tsbuildinfo
+/.vs/dynamic-insurance-form-complete/FileContentIndex/f4adc548-4d61-4b43-822a-0620dd21bb6c.vsidx
+*.sqlite
+*.vsidx
