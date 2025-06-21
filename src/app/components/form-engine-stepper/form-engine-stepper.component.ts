@@ -1,15 +1,14 @@
-// form-engine-stepper.component.ts
-import { Component, OnInit, Input, Output, EventEmitter } from "@angular/core";
-import { FormGroup } from "@angular/forms";
-import { FormPage } from "src/app/models/form-question.model";
-import { FormEngineService } from "src/app/services/form-engine.service";
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
+import { FormGroup } from '@angular/forms';
+import { FormPage } from 'src/app/models/form-question.model';
+import { FormEngineService } from 'src/app/services/form-engine.service';
 
 @Component({
     selector: 'form-engine-stepper',
     templateUrl: './form-engine-stepper.component.html',
     standalone: false
 })
-export class FormEngineStepperComponent implements OnInit {
+export class FormEngineStepperComponent implements OnChanges {
     @Input() form!: FormGroup;
     @Input() pages: FormPage[] = [];
     @Input() currentPage = 0;
@@ -21,29 +20,41 @@ export class FormEngineStepperComponent implements OnInit {
 
     constructor(public formEngineService: FormEngineService) { }
 
-    ngOnInit(): void {
-        this.formEngineService.pageVisited$.subscribe((index) => {
-            this.markPageVisited(index);
-        });
-
-        this.formEngineService.pageValidated$.subscribe((index) => {
-            this.updateValidationState(index);
-        });
-
-        this.markPageVisited(this.currentPage);
-    }
-
-
-
-    goToStep(index: number): void {
-        if (this.visitedPages.has(index)) {
-            this.stepChanged.emit(index);
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes['currentPage']) {
+            this.markPageVisited(this.currentPage);
         }
     }
 
-    markPageVisited(index: number): void {
-        this.visitedPages.add(index);
+    goToStep(index: number): void {
+        if (index === this.currentPage) return;
+
+        const isGoingForward = index > this.currentPage;
+        const isFirstPage = this.currentPage === 0;
+        const isGoingBackward = index < this.currentPage;
+
+        const shouldValidate = isGoingForward || isFirstPage;
+
+        if (shouldValidate) {
+            const result = this.formEngineService.validateForm(this.form, this.pages, this.currentPage);
+            if (!result.isValid) {
+                console.warn('Validation failed on current page.');
+                return;
+            }
+        }
+
+        if (isGoingBackward) {
+            const visibleControls = this.formEngineService.getVisibleFormControls(this.form, this.pages, this.currentPage);
+            const hasTouchedInvalid = visibleControls.some(vc => vc.control.touched && vc.control.invalid);
+            if (hasTouchedInvalid) {
+                console.warn('Cannot leave page: some controls are touched and invalid.');
+                return;
+            }
+        }
+
+        this.stepChanged.emit(index);
     }
+
 
     updateValidationState(validatedIndex: number): void {
         let highestValidPage = -1;
@@ -59,4 +70,12 @@ export class FormEngineStepperComponent implements OnInit {
 
         this.maxValidatedIndex = Math.max(this.maxValidatedIndex, highestValidPage);
     }
-} 
+
+    markPageVisited(index: number): void {
+        this.visitedPages.add(index);
+    }
+
+    isStepClickable(index: number): boolean {
+        return this.visitedPages.has(index) || index <= this.maxValidatedIndex;
+    }
+}

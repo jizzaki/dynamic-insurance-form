@@ -61,6 +61,9 @@ export class FormEngineFormComponent implements OnInit {
     if (this.currentPage > 0) {
       this.formEngineService.emitPageVisited(this.currentPage - 1);
     }
+
+    const canLeave = this.formEngineService.canLeavePage(this.form, this.pages, this.currentPage);
+  if (!canLeave) return;
     this.previousPage.emit();
   }
 

@@ -57,6 +57,39 @@ export class FormEngineService {
     return formGroup;
   }
 
+  /** Returns all visible FormControl instances for a given page index, respecting conditionalOn logic. */
+  getVisibleFormControls(form: FormGroup, pages: FormPage[], pageIndex: number): { key: string, control: FormControl }[] {
+    const visibleControls: { key: string, control: FormControl }[] = [];
+
+    if (!pages?.[pageIndex]) return visibleControls;
+
+    const sections = pages[pageIndex].sections || [];
+
+    for (const section of sections) {
+      const sectionVisible = section.conditionalOn ? this.evaluateConditionalOn(section.conditionalOn, form) : true;
+
+      if (!section.questions?.length) continue;
+
+      for (const question of section.questions) {
+        this.collectVisibleQuestions(question, sectionVisible, form, visibleControls);
+
+        // Handle repeatable questions
+        if (section.repeatFor?.key) {
+          const repeatCount = form.get(section.repeatFor.key)?.value || 0;
+          for (let i = 0; i < repeatCount; i++) {
+            const key = `${question.key}_${i}`;
+            const ctrl = form.get(key);
+            if (ctrl && ctrl.enabled && this.isVisible(question, form, sectionVisible)) {
+              visibleControls.push({ key, control: ctrl as FormControl });
+            }
+          }
+        }
+      }
+    }
+
+    return visibleControls;
+  }
+
   /** Validates visible fields for either current or all pages depending on index. */
   validateForm(form: FormGroup, pages: FormPage[], currentPageIndex: number) {
     const targetPages = currentPageIndex === pages.length - 1 ? pages : [pages[currentPageIndex]];
@@ -144,6 +177,13 @@ export class FormEngineService {
     this.pageVisited$.next(index);
   }
 
+  /** Check if form controls on page are untouched. */
+  canLeavePage(form: FormGroup, pages: FormPage[], pageIndex: number): boolean {
+    const controls = this.getVisibleFormControls(form, pages, pageIndex);
+    return controls.every(c => !c.control.touched || c.control.valid);
+  }
+
+
   emitPageValidated(index: number): void {
     this.pageValidated$.next(index);
   }
@@ -159,6 +199,29 @@ export class FormEngineService {
   emitSubmitForm(): void {
     this.submitForm$.next();
   }
+
+  /** Recursively collects visible questions and their children */
+  private collectVisibleQuestions(
+    question: FormQuestion,
+    parentVisible: boolean,
+    form: FormGroup,
+    result: { key: string, control: FormControl }[]
+  ): void {
+    const isVisible = this.isVisible(question, form, parentVisible);
+    if (isVisible && question.key) {
+      const ctrl = form.get(question.key);
+      if (ctrl && ctrl.enabled) {
+        result.push({ key: question.key, control: ctrl as FormControl });
+      }
+    }
+
+    if (question.children?.length) {
+      question.children.forEach(child => {
+        this.collectVisibleQuestions(child, isVisible, form, result);
+      });
+    }
+  }
+
 
   private isFormPageArray(input: any[]): input is FormPage[] {
     return input.length > 0 &&

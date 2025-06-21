@@ -1,8 +1,8 @@
 <nav class="stepper">
   <ng-container *ngFor="let page of pages; let i = index">
-    <button
-      [disabled]="!visitedPages.has(i)"
+    <button 
       [class.active]="i === currentPage"
+      [class.visited]="visitedPages.has(i)"
       (click)="goToStep(i)">
       Step {{ i + 1 }}
     </button>
