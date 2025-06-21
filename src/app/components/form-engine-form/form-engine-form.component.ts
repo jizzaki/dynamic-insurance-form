@@ -58,14 +58,25 @@ export class FormEngineFormComponent implements OnInit {
   }
 
   goToPreviousStep(): void {
-    if (this.currentPage > 0) {
-      this.formEngineService.emitPageVisited(this.currentPage - 1);
+    const targetPage = this.currentPage - 1;
+    if (targetPage < 0) return;
+
+    const navCheck = this.formEngineService.shouldBlockNavigation(
+      this.form,
+      this.pages,
+      this.currentPage,
+      targetPage
+    );
+
+    if (!navCheck.allowed) {
+      console.warn(navCheck.reason);
+      return;
     }
 
-    const canLeave = this.formEngineService.canLeavePage(this.form, this.pages, this.currentPage);
-    if (!canLeave) return;
+    this.formEngineService.emitPageVisited(targetPage);
     this.previousPage.emit();
   }
+
 
   submit(): void {
     const result = this.formEngineService.validateForm(this.form, this.pages, this.currentPage);

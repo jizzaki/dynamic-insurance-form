@@ -29,32 +29,14 @@ export class FormEngineStepperComponent implements OnChanges {
     goToStep(index: number): void {
         if (index === this.currentPage) return;
 
-        const isGoingForward = index > this.currentPage;
-        const isFirstPage = this.currentPage === 0;
-        const isGoingBackward = index < this.currentPage;
-
-        const shouldValidate = isGoingForward || isFirstPage;
-
-        if (shouldValidate) {
-            const result = this.formEngineService.validateForm(this.form, this.pages, this.currentPage);
-            if (!result.isValid) {
-                console.warn('Validation failed on current page.');
-                return;
-            }
-        }
-
-        if (isGoingBackward) {
-            const visibleControls = this.formEngineService.getVisibleFormControls(this.form, this.pages, this.currentPage);
-            const hasTouchedInvalid = visibleControls.some(vc => vc.control.touched && vc.control.invalid);
-            if (hasTouchedInvalid) {
-                console.warn('Cannot leave page: some controls are touched and invalid.');
-                return;
-            }
+        const navCheck = this.formEngineService.shouldBlockNavigation(this.form, this.pages, this.currentPage, index);
+        if (!navCheck.allowed) {
+            console.warn(navCheck.reason);
+            return;
         }
 
         this.stepChanged.emit(index);
     }
-
 
     updateValidationState(validatedIndex: number): void {
         let highestValidPage = -1;

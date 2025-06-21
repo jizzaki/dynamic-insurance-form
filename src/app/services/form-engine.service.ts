@@ -177,12 +177,46 @@ export class FormEngineService {
     this.pageVisited$.next(index);
   }
 
-  /** Check if form controls on page are untouched. */
-  canLeavePage(form: FormGroup, pages: FormPage[], pageIndex: number): boolean {
-    const controls = this.getVisibleFormControls(form, pages, pageIndex);
-    return controls.every(c => !c.control.touched || c.control.valid);
-  }
+  shouldBlockNavigation(
+    form: FormGroup,
+    pages: FormPage[],
+    currentPage: number,
+    targetPage: number
+  ): { allowed: boolean; reason?: string } {
+    if (currentPage === targetPage) {
+      return { allowed: true };
+    }
 
+    const isGoingForward = targetPage > currentPage;
+    const isFirstPage = currentPage === 0;
+    const isGoingBackward = targetPage < currentPage;
+
+    const shouldValidate = isGoingForward || isFirstPage;
+
+    if (shouldValidate) {
+      const result = this.validateForm(form, pages, currentPage);
+      if (!result.isValid) {
+        result.invalidKeys.forEach(key => form.get(key)?.markAsTouched());
+        return {
+          allowed: false,
+          reason: 'Validation failed on current page.',
+        };
+      }
+    }
+
+    if (isGoingBackward) {
+      const visibleControls = this.getVisibleFormControls(form, pages, currentPage);
+      const hasTouchedInvalid = visibleControls.some(c => c.control.touched && c.control.invalid);
+      if (hasTouchedInvalid) {
+        return {
+          allowed: false,
+          reason: 'Cannot leave page: touched controls are invalid.',
+        };
+      }
+    }
+
+    return { allowed: true };
+  }
 
   emitPageValidated(index: number): void {
     this.pageValidated$.next(index);
