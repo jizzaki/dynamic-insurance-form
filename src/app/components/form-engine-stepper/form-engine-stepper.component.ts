@@ -56,8 +56,4 @@ export class FormEngineStepperComponent implements OnChanges {
     markPageVisited(index: number): void {
         this.visitedPages.add(index);
     }
-
-    isStepClickable(index: number): boolean {
-        return this.visitedPages.has(index) || index <= this.maxValidatedIndex;
-    }
 }

@@ -77,7 +77,6 @@ export class FormEngineFormComponent implements OnInit {
     this.previousPage.emit();
   }
 
-
   submit(): void {
     const result = this.formEngineService.validateForm(this.form, this.pages, this.currentPage);
 
